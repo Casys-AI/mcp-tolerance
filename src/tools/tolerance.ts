@@ -13,6 +13,7 @@ import {
   DIAMETER_RANGES,
   findRangeIndex,
   fundamentalTolerance,
+  parseDesignation,
   SUPPORTED_SHAFT_LETTERS,
 } from "../api/iso286.ts";
 
@@ -128,8 +129,9 @@ const toleranceFitTool: ToleranceTool = {
     properties: {
       hole_code: {
         type: "string",
-        description: "Hole tolerance designation, e.g. 'H7'. Currently only 'H' is " +
-          "supported as the hole letter (ISO hole-system base). " +
+        description: "Hole tolerance designation. Only letter 'H' is supported " +
+          "(ISO hole-basis system). Use tolerance_fit_analyze for other hole " +
+          "letters (C, D, E, F, G, JS, K, M, N, P, R, S). " +
           "Grade must be 1–18.",
         examples: ["H7", "H6", "H8", "H11"],
       },
@@ -169,6 +171,18 @@ const toleranceFitTool: ToleranceTool = {
     if (rawDiam <= 0 || rawDiam > 500) {
       throw new RangeError(
         `nominal_diameter_mm must be in (0, 500]; got ${rawDiam}.`,
+      );
+    }
+
+    // Enforce H-only hole letter — this tool is the hole-basis oracle.
+    // For shaft-basis or non-H hole letters use tolerance_fit_analyze.
+    const holeParsed = parseDesignation(holeCode);
+    if (holeParsed.letter !== "H") {
+      throw new TypeError(
+        `tolerance_fit only supports hole letter 'H' (hole-basis system); ` +
+          `got '${holeParsed.letter}'. ` +
+          `For hole letters C, D, E, F, G, JS, K, M, N, P, R, S use ` +
+          `tolerance_fit_analyze instead.`,
       );
     }
 
@@ -243,8 +257,9 @@ const toleranceItTool: ToleranceTool = {
   description:
     "Return the fundamental tolerance value IT in µm for a given IT grade and " +
     "nominal diameter, per ISO 286-1:2010. " +
-    "Grades 5–18 are computed from the tolerance factor formula; " +
-    "grades 1–4 are from ISO 286-1:2010 Table 1. " +
+    "Grades 1–12 are from ISO 286-1:2010 Table 1 (tabulated normative values). " +
+    "Grades 13–18 are computed from the tolerance factor formula i=0.45×D^(1/3)+0.001×D " +
+    "with ISO tiered rounding. " +
     "Provenance is declared on every result. " +
     "No verdict.",
   inputSchema: {

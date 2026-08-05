@@ -351,7 +351,8 @@ Deno.test("H7/n6 at 25 mm is a transition fit (clearance_min=-28, clearance_max=
   assertEquals(result.fit.max_clearance_um, 6);
 });
 
-Deno.test("computeFit rejects unsupported hole letter", () => {
+Deno.test("computeFit rejects uppercase shaft letter (G6 must be g6)", () => {
+  // G7 is a valid hole letter; G6 as shaft is rejected because shaft must be lowercase.
   assertThrows(() => computeFit("G7", "G6", 25), TypeError);
 });
 
@@ -615,6 +616,16 @@ Deno.test("tolerance_fit tool handler returns correct structured content for H7/
   assertEquals((sc.shaft as Record<string, unknown>).ei_um, -20);
   assertEquals((sc.fit as Record<string, unknown>).type, "clearance");
   assertEquals(sc.provenance, "ISO 286-1:2010 formulas/tables");
+});
+
+Deno.test("tolerance_fit rejects non-H hole letter with recovery hint to tolerance_fit_analyze", () => {
+  const tool = allTools.find((t) => t.name === "tolerance_fit");
+  assert(tool, "tolerance_fit tool must exist");
+  assertThrows(
+    () => tool.handler({ hole_code: "G7", shaft_code: "h6", nominal_diameter_mm: 25 }),
+    TypeError,
+    "tolerance_fit_analyze",
+  );
 });
 
 Deno.test("tolerance_it tool handler returns IT7 = 21 µm at 25 mm", () => {
