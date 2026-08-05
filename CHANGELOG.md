@@ -2,26 +2,35 @@
 
 All notable changes to `@casys/mcp-tolerance` are documented here.
 
+## 0.2.0
+
+- `scripts/stdio-shim.ts`: stdio → stateless-HTTP adapter. Classic-SDK stdio clients
+  (Docker MCP Toolkit, desktop hosts) get `initialize` answered locally from
+  `server/discover`; everything else is forwarded in the 2026-07-28 stateless envelope,
+  which is the only revision the server accepts on the wire.
+- `docker-entrypoint.sh`: the image now has two run modes — `http` (default, unchanged)
+  and `stdio` (`docker run -i <image> stdio`).
+
 ## [0.1.0] — 2026-08-05
 
 ### Added
 
 - `tolerance_fit` — compute hole and shaft deviation limits (EI/ES in µm, ei/es in µm)
   and fit type (clearance/transition/interference) for a **hole-basis** designation pair
-  at a given nominal diameter, per ISO 286-1:2010. Hole letter restricted to `H`;
-  use `tolerance_fit_analyze` for other hole letters. Supported shaft letters:
-  c, d, e, f, g, h, js, k, m, n, p, r, s, u.
-  All results carry an explicit `provenance: "ISO 286-1:2010 formulas/tables"` field.
+  at a given nominal diameter, per ISO 286-1:2010. Hole letter restricted to `H`; use
+  `tolerance_fit_analyze` for other hole letters. Supported shaft letters: c, d, e, f,
+  g, h, js, k, m, n, p, r, s, u. All results carry an explicit
+  `provenance: "ISO 286-1:2010 formulas/tables"` field.
 
 - `tolerance_it` — return the fundamental tolerance IT value in µm for a given grade
   (1–18) and nominal diameter (0, 500] mm. Grades 1–12 are from ISO 286-1:2010 Table 1
-  (tabulated normative values). Grades 13–18 use the tolerance factor formula
-  i = 0.45×D^(1/3) + 0.001×D with ISO tiered rounding.
+  (tabulated normative values). Grades 13–18 use the tolerance factor formula i =
+  0.45×D^(1/3) + 0.001×D with ISO tiered rounding.
 
 - `tolerance_limits` — resolve a single ISO 286-1 tolerance class (hole or shaft) to
   upper/lower deviations, IT_um, and fundamental deviation in µm. Supports hole letters
-  C, D, E, F, G, H, JS, K, M, N, P, R, S and shaft letters c, d, e, f, g, h, js, k,
-  m, n, p, r, s, u.
+  C, D, E, F, G, H, JS, K, M, N, P, R, S and shaft letters c, d, e, f, g, h, js, k, m,
+  n, p, r, s, u.
 
 - `tolerance_fit_analyze` — hole/shaft fit analysis supporting both the hole-basis and
   shaft-basis systems. Accepts any supported hole letter (C–S) paired with any shaft
@@ -46,15 +55,15 @@ All notable changes to `@casys/mcp-tolerance` are documented here.
   - n @ 80–120 mm: ei = 23 µm (formula gives 24 — table is normative) ✓
   - r @ 80–100 mm: ei = 51 µm ✓
 
-- Normative cross-check script `scripts/check_iso286_fixtures.ts` — verifies 203
-  values from `tests/fixtures/iso286_table_values.json` (ISO 286-1:2010 Tables 1–3)
-  against the engine; exits 1 on any divergence.
+- Normative cross-check script `scripts/check_iso286_fixtures.ts` — verifies 203 values
+  from `tests/fixtures/iso286_table_values.json` (ISO 286-1:2010 Tables 1–3) against the
+  engine; exits 1 on any divergence.
 
-- Stateless HTTP MCP server on port 3019, protocol `2026-07-28`, transport matching
-  the Casys engineering toolchain (`mcp-server@0.24.1`).
+- Stateless HTTP MCP server on port 3019, protocol `2026-07-28`, transport matching the
+  Casys engineering toolchain (`mcp-server@0.24.1`).
 
-- Pure TypeScript engine — no external binaries, no subprocess, no LLM. All formulas
-  and table values are in `src/api/iso286.ts` with inline provenance references.
+- Pure TypeScript engine — no external binaries, no subprocess, no LLM. All formulas and
+  table values are in `src/api/iso286.ts` with inline provenance references.
 
 - 82 unit and integration tests; `deno task release:check` passes.
 
@@ -66,7 +75,7 @@ All notable changes to `@casys/mcp-tolerance` are documented here.
 - Shaft clearance letters (c, d, e, f, g): ISO 286-1:2010 Table 2 (tabulated es).
 - Shaft reference letter h: es = 0 by ISO definition.
 - Shaft letter js: symmetric ±IT/2.
-- Shaft transition/interference letters (k, m, n, p, r, s, u): ISO 286-1:2010
-  Table 3 (tabulated ei).
-- Hole letters derived by the ISO rule: EI_hole = −es_shaft (clearance C–G);
-  ES_hole = −ei_shaft (interference/transition K–S).
+- Shaft transition/interference letters (k, m, n, p, r, s, u): ISO 286-1:2010 Table 3
+  (tabulated ei).
+- Hole letters derived by the ISO rule: EI_hole = −es_shaft (clearance C–G); ES_hole =
+  −ei_shaft (interference/transition K–S).

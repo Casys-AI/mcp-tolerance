@@ -210,7 +210,9 @@ for (const entry of fixture.fit_results) {
     );
     failures++;
   } else {
-    console.log(`  ok  ${entry.hole_code}/${entry.shaft_code} fit_type = ${result.fit.type}`);
+    console.log(
+      `  ok  ${entry.hole_code}/${entry.shaft_code} fit_type = ${result.fit.type}`,
+    );
   }
   check(
     `${entry.hole_code}/${entry.shaft_code} clearance_min`,
@@ -230,7 +232,9 @@ for (const entry of fixture.fit_results) {
 
 console.log(`\n${checks} checks, ${failures} failures`);
 if (failures > 0) {
-  console.error(`\nCROSS-CHECK FAILED: ${failures} fixture values diverge from engine.`);
+  console.error(
+    `\nCROSS-CHECK FAILED: ${failures} fixture values diverge from engine.`,
+  );
   Deno.exit(1);
 } else {
   console.log("\nCROSS-CHECK PASSED: engine matches all ISO 286-1 table values.");

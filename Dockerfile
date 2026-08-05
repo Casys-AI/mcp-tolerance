@@ -9,6 +9,8 @@ WORKDIR /app
 COPY deno.json deno.lock ./
 COPY server.ts mod.ts ./
 COPY src/ ./src/
+COPY scripts/ ./scripts/
+COPY docker-entrypoint.sh ./
 
 # Pre-cache all transitive deps using the committed lock file.
 # --frozen ensures we never silently drift from the committed lock.
@@ -18,5 +20,5 @@ EXPOSE 3019
 
 # --hostname=0.0.0.0 is a supported CLI option (server.ts:parseCli).
 # Default bind is 127.0.0.1 — override here is legitimate, not a patch.
-CMD ["deno", "run", "--allow-all", "server.ts", \
-     "--port=3019", "--hostname=0.0.0.0"]
+ENTRYPOINT ["./docker-entrypoint.sh"]
+CMD ["http"]
