@@ -10,16 +10,28 @@ export type {
   ToleranceToolHandler,
 } from "./types.ts";
 export { fitTools } from "./tolerance.ts";
+export { toleranceLimitsTool } from "./limits.ts";
+export { toleranceFitAnalyzeTool } from "./fit_analyze.ts";
+export { toleranceStackupTool } from "./stackup.ts";
 
 import { fitTools } from "./tolerance.ts";
+import { toleranceLimitsTool } from "./limits.ts";
+import { toleranceFitAnalyzeTool } from "./fit_analyze.ts";
+import { toleranceStackupTool } from "./stackup.ts";
 import type { ToleranceTool } from "./types.ts";
 
 /** All tolerance tools combined. */
-export const allTools: ToleranceTool[] = [...fitTools];
+export const allTools: ToleranceTool[] = [
+  ...fitTools,
+  toleranceLimitsTool,
+  toleranceFitAnalyzeTool,
+  toleranceStackupTool,
+];
 
 /** Tools organised by category. */
 export const toolsByCategory: Record<string, ToleranceTool[]> = {
-  fit: fitTools,
+  fit: [...fitTools, toleranceLimitsTool, toleranceFitAnalyzeTool],
+  stack: [toleranceStackupTool],
 };
 
 export function getToolsByCategory(category: string): ToleranceTool[] {

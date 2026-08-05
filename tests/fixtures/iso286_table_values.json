@@ -1,0 +1,640 @@
+{
+  "_comment": "Normative ISO 286-1:2010 table values used as ground truth for engine cross-check. Each entry cites its source table and range. All deviations in µm, diameters in mm.",
+  "it_grades": [
+    {
+      "nominal_mm": 2,
+      "range": [0, 3],
+      "source": "ISO 286-1:2010 Table 1, range 0–3 mm",
+      "grades": {
+        "IT5": 4,
+        "IT6": 6,
+        "IT7": 10,
+        "IT8": 14,
+        "IT9": 25,
+        "IT10": 40,
+        "IT11": 60,
+        "IT12": 100
+      }
+    },
+    {
+      "nominal_mm": 5,
+      "range": [3, 6],
+      "source": "ISO 286-1:2010 Table 1, range 3–6 mm",
+      "grades": {
+        "IT5": 5,
+        "IT6": 8,
+        "IT7": 12,
+        "IT8": 18,
+        "IT9": 30,
+        "IT10": 48,
+        "IT11": 75,
+        "IT12": 120
+      }
+    },
+    {
+      "nominal_mm": 8,
+      "range": [6, 10],
+      "source": "ISO 286-1:2010 Table 1, range 6–10 mm",
+      "grades": {
+        "IT5": 6,
+        "IT6": 9,
+        "IT7": 15,
+        "IT8": 22,
+        "IT9": 36,
+        "IT10": 58,
+        "IT11": 90,
+        "IT12": 150
+      }
+    },
+    {
+      "nominal_mm": 14,
+      "range": [10, 18],
+      "source": "ISO 286-1:2010 Table 1, range 10–18 mm",
+      "grades": {
+        "IT5": 8,
+        "IT6": 11,
+        "IT7": 18,
+        "IT8": 27,
+        "IT9": 43,
+        "IT10": 70,
+        "IT11": 110,
+        "IT12": 180
+      }
+    },
+    {
+      "nominal_mm": 25,
+      "range": [18, 30],
+      "source": "ISO 286-1:2010 Table 1, range 18–30 mm",
+      "grades": {
+        "IT5": 9,
+        "IT6": 13,
+        "IT7": 21,
+        "IT8": 33,
+        "IT9": 52,
+        "IT10": 84,
+        "IT11": 130,
+        "IT12": 210
+      }
+    },
+    {
+      "nominal_mm": 40,
+      "range": [30, 50],
+      "source": "ISO 286-1:2010 Table 1, range 30–50 mm",
+      "grades": {
+        "IT5": 11,
+        "IT6": 16,
+        "IT7": 25,
+        "IT8": 39,
+        "IT9": 62,
+        "IT10": 100,
+        "IT11": 160,
+        "IT12": 250
+      }
+    },
+    {
+      "nominal_mm": 60,
+      "range": [50, 80],
+      "source": "ISO 286-1:2010 Table 1, range 50–80 mm",
+      "grades": {
+        "IT5": 13,
+        "IT6": 19,
+        "IT7": 30,
+        "IT8": 46,
+        "IT9": 74,
+        "IT10": 120,
+        "IT11": 190,
+        "IT12": 300
+      }
+    },
+    {
+      "nominal_mm": 100,
+      "range": [80, 120],
+      "source": "ISO 286-1:2010 Table 1, range 80–120 mm",
+      "grades": {
+        "IT5": 15,
+        "IT6": 22,
+        "IT7": 35,
+        "IT8": 54,
+        "IT9": 87,
+        "IT10": 140,
+        "IT11": 220,
+        "IT12": 350
+      }
+    },
+    {
+      "nominal_mm": 150,
+      "range": [120, 180],
+      "source": "ISO 286-1:2010 Table 1, range 120–180 mm",
+      "grades": {
+        "IT5": 18,
+        "IT6": 25,
+        "IT7": 40,
+        "IT8": 63,
+        "IT9": 100,
+        "IT10": 160,
+        "IT11": 250,
+        "IT12": 400
+      }
+    },
+    {
+      "nominal_mm": 200,
+      "range": [180, 250],
+      "source": "ISO 286-1:2010 Table 1, range 180–250 mm",
+      "grades": {
+        "IT5": 20,
+        "IT6": 29,
+        "IT7": 46,
+        "IT8": 72,
+        "IT9": 115,
+        "IT10": 185,
+        "IT11": 290,
+        "IT12": 460
+      }
+    },
+    {
+      "nominal_mm": 280,
+      "range": [250, 315],
+      "source": "ISO 286-1:2010 Table 1, range 250–315 mm",
+      "grades": {
+        "IT5": 23,
+        "IT6": 32,
+        "IT7": 52,
+        "IT8": 81,
+        "IT9": 130,
+        "IT10": 210,
+        "IT11": 320,
+        "IT12": 520
+      }
+    },
+    {
+      "nominal_mm": 360,
+      "range": [315, 400],
+      "source": "ISO 286-1:2010 Table 1, range 315–400 mm",
+      "grades": {
+        "IT5": 25,
+        "IT6": 36,
+        "IT7": 57,
+        "IT8": 89,
+        "IT9": 140,
+        "IT10": 230,
+        "IT11": 360,
+        "IT12": 570
+      }
+    },
+    {
+      "nominal_mm": 450,
+      "range": [400, 500],
+      "source": "ISO 286-1:2010 Table 1, range 400–500 mm",
+      "grades": {
+        "IT5": 27,
+        "IT6": 40,
+        "IT7": 63,
+        "IT8": 97,
+        "IT9": 155,
+        "IT10": 250,
+        "IT11": 400,
+        "IT12": 630
+      }
+    }
+  ],
+  "shaft_clearance_deviations": {
+    "_comment": "Upper deviation es in µm. Source: ISO 286-1:2010 Table 2. Letters c, d, e, f, g.",
+    "c": [
+      {
+        "nominal_mm": 2,
+        "range": [0, 3],
+        "es_um": -60,
+        "source": "ISO 286-1:2010 Table 2"
+      },
+      {
+        "nominal_mm": 5,
+        "range": [3, 6],
+        "es_um": -70,
+        "source": "ISO 286-1:2010 Table 2"
+      },
+      {
+        "nominal_mm": 25,
+        "range": [18, 30],
+        "es_um": -110,
+        "source": "ISO 286-1:2010 Table 2"
+      },
+      {
+        "nominal_mm": 100,
+        "range": [80, 120],
+        "es_um": -140,
+        "source": "ISO 286-1:2010 Table 2"
+      },
+      {
+        "nominal_mm": 450,
+        "range": [400, 500],
+        "es_um": -230,
+        "source": "ISO 286-1:2010 Table 2"
+      }
+    ],
+    "d": [
+      {
+        "nominal_mm": 2,
+        "range": [0, 3],
+        "es_um": -20,
+        "source": "ISO 286-1:2010 Table 2"
+      },
+      {
+        "nominal_mm": 5,
+        "range": [3, 6],
+        "es_um": -30,
+        "source": "ISO 286-1:2010 Table 2"
+      },
+      {
+        "nominal_mm": 25,
+        "range": [18, 30],
+        "es_um": -65,
+        "source": "ISO 286-1:2010 Table 2"
+      },
+      {
+        "nominal_mm": 100,
+        "range": [80, 120],
+        "es_um": -120,
+        "source": "ISO 286-1:2010 Table 2"
+      },
+      {
+        "nominal_mm": 450,
+        "range": [400, 500],
+        "es_um": -230,
+        "source": "ISO 286-1:2010 Table 2"
+      }
+    ],
+    "e": [
+      {
+        "nominal_mm": 2,
+        "range": [0, 3],
+        "es_um": -14,
+        "source": "ISO 286-1:2010 Table 2"
+      },
+      {
+        "nominal_mm": 5,
+        "range": [3, 6],
+        "es_um": -20,
+        "source": "ISO 286-1:2010 Table 2"
+      },
+      {
+        "nominal_mm": 25,
+        "range": [18, 30],
+        "es_um": -40,
+        "source": "ISO 286-1:2010 Table 2"
+      },
+      {
+        "nominal_mm": 100,
+        "range": [80, 120],
+        "es_um": -72,
+        "source": "ISO 286-1:2010 Table 2"
+      },
+      {
+        "nominal_mm": 450,
+        "range": [400, 500],
+        "es_um": -135,
+        "source": "ISO 286-1:2010 Table 2"
+      }
+    ],
+    "f": [
+      {
+        "nominal_mm": 2,
+        "range": [0, 3],
+        "es_um": -6,
+        "source": "ISO 286-1:2010 Table 2"
+      },
+      {
+        "nominal_mm": 5,
+        "range": [3, 6],
+        "es_um": -10,
+        "source": "ISO 286-1:2010 Table 2"
+      },
+      {
+        "nominal_mm": 25,
+        "range": [18, 30],
+        "es_um": -20,
+        "source": "ISO 286-1:2010 Table 2"
+      },
+      {
+        "nominal_mm": 100,
+        "range": [80, 120],
+        "es_um": -36,
+        "source": "ISO 286-1:2010 Table 2"
+      },
+      {
+        "nominal_mm": 450,
+        "range": [400, 500],
+        "es_um": -68,
+        "source": "ISO 286-1:2010 Table 2"
+      }
+    ],
+    "g": [
+      {
+        "nominal_mm": 2,
+        "range": [0, 3],
+        "es_um": -2,
+        "source": "ISO 286-1:2010 Table 2"
+      },
+      {
+        "nominal_mm": 5,
+        "range": [3, 6],
+        "es_um": -4,
+        "source": "ISO 286-1:2010 Table 2"
+      },
+      {
+        "nominal_mm": 25,
+        "range": [18, 30],
+        "es_um": -7,
+        "source": "ISO 286-1:2010 Table 2"
+      },
+      {
+        "nominal_mm": 100,
+        "range": [80, 120],
+        "es_um": -12,
+        "source": "ISO 286-1:2010 Table 2"
+      },
+      {
+        "nominal_mm": 450,
+        "range": [400, 500],
+        "es_um": -20,
+        "source": "ISO 286-1:2010 Table 2"
+      }
+    ]
+  },
+  "shaft_interference_deviations": {
+    "_comment": "Lower deviation ei in µm. Source: ISO 286-1:2010 Table 3. Letters k, m, n, p, r, s, u.",
+    "k": [
+      {
+        "nominal_mm": 2,
+        "range": [0, 3],
+        "ei_um": 2,
+        "source": "ISO 286-1:2010 Table 3 (k: ei=+2 for D≤3)"
+      },
+      {
+        "nominal_mm": 5,
+        "range": [3, 6],
+        "ei_um": 0,
+        "source": "ISO 286-1:2010 Table 3 (k: ei=0 for D>3)"
+      },
+      {
+        "nominal_mm": 25,
+        "range": [18, 30],
+        "ei_um": 0,
+        "source": "ISO 286-1:2010 Table 3"
+      }
+    ],
+    "m": [
+      {
+        "nominal_mm": 2,
+        "range": [0, 3],
+        "ei_um": 2,
+        "source": "ISO 286-1:2010 Table 3"
+      },
+      {
+        "nominal_mm": 25,
+        "range": [18, 30],
+        "ei_um": 8,
+        "source": "ISO 286-1:2010 Table 3"
+      },
+      {
+        "nominal_mm": 100,
+        "range": [80, 120],
+        "ei_um": 13,
+        "source": "ISO 286-1:2010 Table 3"
+      }
+    ],
+    "n": [
+      {
+        "nominal_mm": 2,
+        "range": [0, 3],
+        "ei_um": 4,
+        "source": "ISO 286-1:2010 Table 3"
+      },
+      {
+        "nominal_mm": 5,
+        "range": [3, 6],
+        "ei_um": 8,
+        "source": "ISO 286-1:2010 Table 3"
+      },
+      {
+        "nominal_mm": 25,
+        "range": [18, 30],
+        "ei_um": 15,
+        "source": "ISO 286-1:2010 Table 3"
+      },
+      {
+        "nominal_mm": 100,
+        "range": [80, 120],
+        "ei_um": 23,
+        "source": "ISO 286-1:2010 Table 3 (formula gives 24 — table prevails)"
+      }
+    ],
+    "p": [
+      {
+        "nominal_mm": 2,
+        "range": [0, 3],
+        "ei_um": 6,
+        "source": "ISO 286-1:2010 Table 3"
+      },
+      {
+        "nominal_mm": 5,
+        "range": [3, 6],
+        "ei_um": 12,
+        "source": "ISO 286-1:2010 Table 3"
+      },
+      {
+        "nominal_mm": 25,
+        "range": [18, 30],
+        "ei_um": 22,
+        "source": "ISO 286-1:2010 Table 3"
+      },
+      {
+        "nominal_mm": 100,
+        "range": [80, 120],
+        "ei_um": 37,
+        "source": "ISO 286-1:2010 Table 3"
+      }
+    ],
+    "r": [
+      {
+        "nominal_mm": 2,
+        "range": [0, 3],
+        "ei_um": 10,
+        "source": "ISO 286-1:2010 Table 3"
+      },
+      {
+        "nominal_mm": 25,
+        "range": [18, 30],
+        "ei_um": 28,
+        "source": "ISO 286-1:2010 Table 3"
+      },
+      {
+        "nominal_mm": 100,
+        "range": [80, 120],
+        "ei_um": 51,
+        "source": "ISO 286-1:2010 Table 3 (first sub-range 80–100 used)"
+      }
+    ],
+    "s": [
+      {
+        "nominal_mm": 2,
+        "range": [0, 3],
+        "ei_um": 14,
+        "source": "ISO 286-1:2010 Table 3"
+      },
+      {
+        "nominal_mm": 25,
+        "range": [18, 30],
+        "ei_um": 35,
+        "source": "ISO 286-1:2010 Table 3"
+      },
+      {
+        "nominal_mm": 100,
+        "range": [80, 120],
+        "ei_um": 59,
+        "source": "ISO 286-1:2010 Table 3 (first sub-range 80–100 used)"
+      }
+    ],
+    "u": [
+      {
+        "nominal_mm": 2,
+        "range": [0, 3],
+        "ei_um": 18,
+        "source": "ISO 286-1:2010 Table 3"
+      },
+      {
+        "nominal_mm": 25,
+        "range": [18, 30],
+        "ei_um": 41,
+        "source": "ISO 286-1:2010 Table 3"
+      }
+    ]
+  },
+  "fit_results": [
+    {
+      "description": "H7/g6 clearance fit at 25 mm — standard reference example",
+      "hole_code": "H7",
+      "shaft_code": "g6",
+      "nominal_mm": 25,
+      "hole_EI_um": 0,
+      "hole_ES_um": 21,
+      "shaft_ei_um": -20,
+      "shaft_es_um": -7,
+      "fit_type": "clearance",
+      "clearance_min_um": 7,
+      "clearance_max_um": 41,
+      "source": "ISO 286-1:2010 (H7: EI=0,ES=21; g6: es=−7,ei=−20; gap 7–41 µm)"
+    },
+    {
+      "description": "H7/p6 interference fit at 25 mm",
+      "hole_code": "H7",
+      "shaft_code": "p6",
+      "nominal_mm": 25,
+      "hole_EI_um": 0,
+      "hole_ES_um": 21,
+      "shaft_ei_um": 22,
+      "shaft_es_um": 35,
+      "fit_type": "interference",
+      "clearance_min_um": -35,
+      "clearance_max_um": -1,
+      "source": "ISO 286-1:2010 (p6: ei=22,es=35; interference 1–35 µm)"
+    },
+    {
+      "description": "H7/h6 clearance reference fit at 25 mm",
+      "hole_code": "H7",
+      "shaft_code": "h6",
+      "nominal_mm": 25,
+      "hole_EI_um": 0,
+      "hole_ES_um": 21,
+      "shaft_ei_um": -13,
+      "shaft_es_um": 0,
+      "fit_type": "clearance",
+      "clearance_min_um": 0,
+      "clearance_max_um": 34,
+      "source": "ISO 286-1:2010 (h6: es=0,ei=−13; clearance 0–34 µm)"
+    },
+    {
+      "description": "G7/h6 clearance fit at 25 mm (shaft-basis system, equivalent spread to H7/g6)",
+      "hole_code": "G7",
+      "shaft_code": "h6",
+      "nominal_mm": 25,
+      "hole_EI_um": 7,
+      "hole_ES_um": 28,
+      "shaft_ei_um": -13,
+      "shaft_es_um": 0,
+      "fit_type": "clearance",
+      "clearance_min_um": 7,
+      "clearance_max_um": 41,
+      "source": "ISO 286-1:2010 (G: EI=−es_g=+7; G7 EI=7,ES=28; same spread as H7/g6)"
+    },
+    {
+      "description": "H7/k6 transition fit at 25 mm",
+      "hole_code": "H7",
+      "shaft_code": "k6",
+      "nominal_mm": 25,
+      "hole_EI_um": 0,
+      "hole_ES_um": 21,
+      "shaft_ei_um": 0,
+      "shaft_es_um": 13,
+      "fit_type": "transition",
+      "clearance_min_um": -13,
+      "clearance_max_um": 21,
+      "source": "ISO 286-1:2010 (k6: ei=0,es=13 for D>3)"
+    },
+    {
+      "description": "H7/n6 transition fit at 25 mm",
+      "hole_code": "H7",
+      "shaft_code": "n6",
+      "nominal_mm": 25,
+      "hole_EI_um": 0,
+      "hole_ES_um": 21,
+      "shaft_ei_um": 15,
+      "shaft_es_um": 28,
+      "fit_type": "transition",
+      "clearance_min_um": -28,
+      "clearance_max_um": 6,
+      "source": "ISO 286-1:2010 (n6: ei=15,es=28; clearance_min=0−28=−28, clearance_max=21−15=+6 → transition)"
+    }
+  ],
+  "hole_deviations": [
+    {
+      "description": "Hole C7 at 25 mm (clearance hole, shaft-basis system)",
+      "hole_code": "C7",
+      "nominal_mm": 25,
+      "EI_um": 110,
+      "ES_um": 131,
+      "source": "ISO 286-1:2010 (EI_C = −es_c = −(−110) = +110; ES = 110+21 = 131)"
+    },
+    {
+      "description": "Hole G7 at 25 mm (clearance hole)",
+      "hole_code": "G7",
+      "nominal_mm": 25,
+      "EI_um": 7,
+      "ES_um": 28,
+      "source": "ISO 286-1:2010 (EI_G = −es_g = −(−7) = +7; ES = 7+21 = 28)"
+    },
+    {
+      "description": "Hole K7 at 25 mm (transition hole)",
+      "hole_code": "K7",
+      "nominal_mm": 25,
+      "EI_um": -21,
+      "ES_um": 0,
+      "source": "ISO 286-1:2010 (ES_K = −ei_k = 0; EI = 0−21 = −21)"
+    },
+    {
+      "description": "Hole P7 at 25 mm (interference hole)",
+      "hole_code": "P7",
+      "nominal_mm": 25,
+      "EI_um": -43,
+      "ES_um": -22,
+      "source": "ISO 286-1:2010 (ES_P = −ei_p = −22; EI = −22−21 = −43)"
+    },
+    {
+      "description": "Hole S7 at 25 mm (heavy interference hole)",
+      "hole_code": "S7",
+      "nominal_mm": 25,
+      "EI_um": -56,
+      "ES_um": -35,
+      "source": "ISO 286-1:2010 (ES_S = −ei_s = −35; EI = −35−21 = −56)"
+    }
+  ]
+}
