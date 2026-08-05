@@ -101,6 +101,30 @@ deno task release:check  # fmt + check + lint + test
 deno run --allow-read scripts/check_iso286_fixtures.ts  # normative cross-check (203 values)
 ```
 
+## Docker
+
+Park port: **3019**. Engine is TypeScript-only (ISO 286-1 formulas) — no system
+binaries required.
+
+```bash
+# Build (multi-arch; arm64 shown)
+docker build --platform linux/arm64 -t mcp-tolerance:local .
+
+# Run
+docker run -d --name mcp-tolerance -p 3019:3019 mcp-tolerance:local
+
+# Smoke test — stateless MCP 2026-07-28
+curl -s -X POST http://127.0.0.1:3019/mcp \
+  -H 'Content-Type: application/json' \
+  -H 'Accept: application/json, text/event-stream' \
+  -H 'MCP-Protocol-Version: 2026-07-28' \
+  -H 'Mcp-Method: tools/list' \
+  -d '{"jsonrpc":"2.0","id":1,"method":"tools/list","params":{"_meta":{"io.modelcontextprotocol/protocolVersion":"2026-07-28","io.modelcontextprotocol/clientCapabilities":{}}}}'
+```
+
+The server default bind is `127.0.0.1`; the image CMD overrides it to `0.0.0.0`
+via the supported `--hostname` flag so the port is reachable from the host.
+
 ## No verdict
 
 These tools compute limits. They never declare a fit suitable or a part conformant.
