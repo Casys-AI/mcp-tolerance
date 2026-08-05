@@ -14,7 +14,7 @@ COPY docker-entrypoint.sh ./
 
 # Pre-cache all transitive deps using the committed lock file.
 # --frozen ensures we never silently drift from the committed lock.
-RUN deno cache --frozen server.ts
+RUN deno cache --frozen server.ts scripts/stdio-shim.ts
 
 EXPOSE 3019
 
