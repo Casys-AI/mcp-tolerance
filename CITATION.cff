@@ -1,0 +1,10 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+title: "mcp-tolerance: MCP oracle for ISO 286-1 fits and 1D tolerance stack-ups — clearance/transition/interference, worst-case and RSS"
+authors:
+  - family-names: Pesle
+    given-names: Erwan Lee
+year: 2026
+license: MIT
+repository-code: https://github.com/Casys-AI/mcp-tolerance
+type: software
