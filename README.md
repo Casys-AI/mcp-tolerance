@@ -16,17 +16,15 @@ for an application, or declare a design conformant.
 
 ### Stateless HTTP from JSR
 
-This checkout's package/server identity is prepared as 0.3.0. Executable JSR commands
-stay pinned to the published package `@0.2.0`, whose `server/discover` and health
-identity is still 0.1.0. The published
-[JSR package](https://jsr.io/@casys/mcp-tolerance) starts on loopback by default:
+The published [JSR package](https://jsr.io/@casys/mcp-tolerance) `@0.3.0` starts on
+loopback by default. Package and server runtime identities are aligned at 0.3.0:
 
 ```bash
 deno run \
   --allow-net=127.0.0.1:3019 \
   --allow-env \
   --allow-read=mcp-server.yaml \
-  jsr:@casys/mcp-tolerance@0.2.0/server \
+  jsr:@casys/mcp-tolerance@0.3.0/server \
   --port=3019
 ```
 
@@ -77,7 +75,7 @@ limits:
 ### stdio for desktop MCP clients
 
 The container's `stdio` mode adapts classic MCP clients to the server's stateless HTTP
-transport. This digest is the published multi-architecture 0.2.0 image:
+transport. This digest is the published multi-architecture 0.3.0 image:
 
 ```json
 {
@@ -88,7 +86,7 @@ transport. This digest is the published multi-architecture 0.2.0 image:
         "run",
         "--rm",
         "-i",
-        "ghcr.io/casys-ai/mcp-tolerance@sha256:fb84ac18847561c9003d0ca19111fa8ab2afe7e99dfcd325129de279dff01aea",
+        "ghcr.io/casys-ai/mcp-tolerance@sha256:4f5327808e09b18a8bd496653d85fc57fad02b1831d88b18dad0acc40c522b52",
         "stdio"
       ]
     }
@@ -97,11 +95,8 @@ transport. This digest is the published multi-architecture 0.2.0 image:
 ```
 
 The image is published for `linux/amd64` and `linux/arm64`. `latest` is a mutable
-convenience tag, not authority for a version or capability. In that digest,
-`/app/deno.json` is package version 0.2.0, but `/app/server.ts` still has legacy
-`VERSION` 0.1.0, so `server/discover` and health report runtime identity 0.1.0.
-This checkout prepares 0.3.0 with aligned package and server metadata; build a
-local image from source for unpublished behavior.
+convenience tag, not authority for a version or capability. In that digest, package and
+server runtime identities are aligned at 0.3.0.
 
 To build a two-mode image from this checkout instead:
 
@@ -118,11 +113,10 @@ docker run --rm -i mcp-tolerance:local stdio
 ### Deno library
 
 The calculation engine and tool catalog are also exported without starting a server.
-This installs the published JSR package `@0.2.0`, not this checkout's prepared `0.3.0`
-identity:
+This installs the published JSR package `@0.3.0`:
 
 ```bash
-deno add jsr:@casys/mcp-tolerance@0.2.0
+deno add jsr:@casys/mcp-tolerance@0.3.0
 ```
 
 ```ts
@@ -208,9 +202,8 @@ it.
 
 This produces a nominal gap of 0.200 mm, a worst-case interval of 0.120–0.270 mm, and an
 RSS interval of approximately 0.142–0.254 mm. Asymmetric tolerances are handled on their
-respective upper and lower sides. Until 0.3.0 is published, `contributor_breakdown` is
-available from this checkout or a local image build. The same terms that form those
-aggregates are returned in `contributor_breakdown`, in input order:
+respective upper and lower sides. The same terms that form those aggregates are returned
+in `contributor_breakdown`, in input order:
 
 ```json
 {
