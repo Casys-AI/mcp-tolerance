@@ -1,164 +1,346 @@
 # @casys/mcp-tolerance
 
-ISO 286-1:2010 dimensional tolerance oracle — an MCP server for computing hole and
-shaft deviation limits, IT grade values, tolerance class lookups, and dimension chain
-stackup from the normative formulas and tables.
+Deterministic, read-only ISO 286-1:2010 fit calculations and 1D tolerance stack-ups,
+exposed through MCP and as a Deno library.
 
-**Target**: makers and small engineering offices that need to verify dimensional
-fits (clearance, transition, interference) before machining or printing parts.
+Give the server `H7/g6` at a nominal diameter of 25 mm and it returns:
 
-## Tools
+- hole H7: 25.000 to 25.021 mm (`EI = 0 µm`, `ES = +21 µm`);
+- shaft g6: 24.980 to 24.993 mm (`ei = -20 µm`, `es = -7 µm`);
+- resulting clearance: 0.007 to 0.041 mm, classified as a clearance fit.
 
-### `tolerance_fit`
+The server performs calculations. It does not inspect a manufactured part, choose a fit
+for an application, or declare a design conformant.
 
-Computes hole/shaft deviation limits and fit type for a **hole-basis** designation
-pair at a given nominal diameter. Restricted to hole letter `H`.
+## Quick start
 
-**Input**:
-- `hole_code` — hole-basis only: `"H7"`, `"H6"`, `"H8"` … (only `H` is supported;
-  for other hole letters use `tolerance_fit_analyze`)
-- `shaft_code` — e.g. `"g6"`, `"p6"`, `"h6"`, `"js9"` (supported letters:
-  c, d, e, f, g, h, js, k, m, n, p, r, s, u)
-- `nominal_diameter_mm` — nominal size in mm, `(0, 500]`
+### Stateless HTTP from JSR
 
-**Output** (all deviations in µm):
-- `hole.EI_um`, `hole.ES_um`, `hole.IT_um`
-- `shaft.ei_um`, `shaft.es_um`, `shaft.IT_um`
-- `fit.type` — `"clearance"`, `"transition"`, or `"interference"`
-- `fit.max_clearance_um`, `fit.min_clearance_um`
-- `fit.max_interference_um`, `fit.min_interference_um`
-- `provenance` — always `"ISO 286-1:2010 formulas/tables"`
-- `not_checked` — explicit list of what this tool does not verify
-
-**Validated cross-checks** (nominal 25 mm, range 18–30):
-- H7/g6 → hole 0/+21 µm, shaft −7/−20 µm, clearance 7–41 µm
-- H7/p6 → shaft +22/+35 µm, interference 1–35 µm
-- H7/h6 → clearance 0–34 µm (reference fit)
-
-### `tolerance_it`
-
-Returns the fundamental tolerance IT value in µm for a grade (1–18) and nominal
-diameter.
-
-- Grades 1–12: ISO 286-1:2010 Table 1 (tabulated normative values).
-- Grades 13–18: tolerance factor formula `i = 0.45×D^(1/3) + 0.001×D` with ISO
-  tiered rounding.
-
-### `tolerance_limits`
-
-Resolves a single ISO 286-1 tolerance class designation to upper and lower deviations
-in µm. Accepts both holes (uppercase letter) and shafts (lowercase letter).
-
-**Input**:
-- `tolerance_class` — e.g. `"H7"`, `"g6"`, `"JS9"`, `"P6"`, `"r6"`
-- `nominal_diameter_mm` — nominal size in mm, `(0, 500]`
-
-**Output** (all in µm): `upper_um`, `lower_um`, `IT_um`, `fundamental_deviation_um`,
-`designation_type` (`"hole"` or `"shaft"`), `diameter_range_mm`, `provenance`,
-`not_checked`.
-
-Supported hole letters: C, D, E, F, G, H, JS, K, M, N, P, R, S.
-Supported shaft letters: c, d, e, f, g, h, js, k, m, n, p, r, s, u.
-
-### `tolerance_fit_analyze`
-
-Analyses a hole/shaft fit by tolerance class pair. Supports both the hole-basis system
-(any hole letter C–S) and the shaft-basis system (base shaft `h` with non-H hole
-letters).
-
-**Input**:
-- `hole_class` — hole designation, e.g. `"H7"`, `"G7"`, `"K6"`, `"P7"`
-- `shaft_class` — shaft designation, e.g. `"g6"`, `"h6"`, `"n6"`, `"r6"`
-- `nominal_diameter_mm` — nominal size in mm, `(0, 500]`
-
-**Output** (all deviations in µm): hole `EI_um`/`ES_um`/`IT_um`, shaft `ei_um`/`es_um`/
-`IT_um`, `clearance_min_um` (EI\_hole − es\_shaft), `clearance_max_um` (ES\_hole −
-ei\_shaft), `fit_type`, `provenance`, `not_checked`.
-
-### `tolerance_stackup`
-
-Worst-case and RSS (Root Sum Square) dimension chain stackup.
-
-**Input**: `contributors` — array of objects each with:
-- `name` — label
-- `nominal_mm` — nominal dimension
-- `plus_um` — upper tolerance offset in µm (≥ 0)
-- `minus_um` — lower tolerance offset in µm (≥ 0)
-- `direction` — `+1` (adds to assembly gap) or `−1` (subtracts)
-
-**Output** (all in mm): `nominal_mm`, `worst_case_min_mm`, `worst_case_max_mm`,
-`rss_min_mm`, `rss_max_mm`, `contributor_count`, `provenance`, `not_checked`.
-
-Worst-case guarantees 100 % assembly conformance. RSS is a statistical estimate —
-see `not_checked` for assumptions.
-
-## Usage
+This checkout's package/server identity is prepared as 0.3.0. Executable JSR commands
+stay pinned to the published package `@0.2.0`, whose `server/discover` and health
+identity is still 0.1.0. The published
+[JSR package](https://jsr.io/@casys/mcp-tolerance) starts on loopback by default:
 
 ```bash
-deno task serve        # starts on http://127.0.0.1:3019/mcp
-deno task test         # run all tests
-deno task release:check  # fmt + check + lint + test
-deno run --allow-read scripts/check_iso286_fixtures.ts  # normative cross-check (203 values)
+deno run \
+  --allow-net=127.0.0.1:3019 \
+  --allow-env \
+  --allow-read=mcp-server.yaml \
+  jsr:@casys/mcp-tolerance@0.2.0/server \
+  --port=3019
 ```
 
-## Docker
-
-Park port: **3019**. Engine is TypeScript-only (ISO 286-1 formulas) — no system
-binaries required.
+Direct HTTP uses the stateless MCP `2026-07-28` wire contract. It has no `initialize`
+exchange or session ID. This request runs the example above:
 
 ```bash
-# Build (multi-arch; arm64 shown)
-docker build --platform linux/arm64 -t mcp-tolerance:local .
-
-# Run
-docker run -d --name mcp-tolerance -p 3019:3019 mcp-tolerance:local
-
-# Smoke test — stateless MCP 2026-07-28
-curl -s -X POST http://127.0.0.1:3019/mcp \
+curl -sS -X POST http://127.0.0.1:3019/mcp \
   -H 'Content-Type: application/json' \
-  -H 'Accept: application/json, text/event-stream' \
   -H 'MCP-Protocol-Version: 2026-07-28' \
-  -H 'Mcp-Method: tools/list' \
-  -d '{"jsonrpc":"2.0","id":1,"method":"tools/list","params":{"_meta":{"io.modelcontextprotocol/protocolVersion":"2026-07-28","io.modelcontextprotocol/clientCapabilities":{}}}}'
+  -H 'Mcp-Method: tools/call' \
+  -H 'Mcp-Name: tolerance_fit' \
+  --data-binary '{
+    "jsonrpc": "2.0",
+    "id": 1,
+    "method": "tools/call",
+    "params": {
+      "name": "tolerance_fit",
+      "arguments": {
+        "hole_code": "H7",
+        "shaft_code": "g6",
+        "nominal_diameter_mm": 25
+      },
+      "_meta": {
+        "io.modelcontextprotocol/protocolVersion": "2026-07-28",
+        "io.modelcontextprotocol/clientCapabilities": {}
+      }
+    }
+  }'
 ```
 
-The server default bind is `127.0.0.1`; the image CMD overrides it to `0.0.0.0`
-via the supported `--hostname` flag so the port is reachable from the host.
+The `structuredContent` payload includes the selected diameter range and the full
+limits:
 
-## No verdict
+```json
+{
+  "diameter_range_mm": [18, 30],
+  "hole": { "EI_um": 0, "ES_um": 21, "IT_um": 21 },
+  "shaft": { "ei_um": -20, "es_um": -7, "IT_um": 13 },
+  "fit": {
+    "type": "clearance",
+    "min_clearance_um": 7,
+    "max_clearance_um": 41
+  }
+}
+```
 
-These tools compute limits. They never declare a fit suitable or a part conformant.
-The caller assesses whether a computed fit meets the application requirements.
+### stdio for desktop MCP clients
 
-## What this server does NOT check
+The container's `stdio` mode adapts classic MCP clients to the server's stateless HTTP
+transport. This digest is the published multi-architecture 0.2.0 image:
 
-Every tool result carries a `not_checked` field enumerating:
-- Surface roughness and form tolerances (circularity, cylindricity)
-- Geometric tolerances (perpendicularity, parallelism)
-- Thermal expansion effects
-- Assembly forces and press-fit stresses for interference fits
-- Nominal diameters above 500 mm or at/below 0 mm
-- Sub-ranges within the 13 main ISO 286-1 ranges (e.g. 50–65 / 65–80 within
-  50–80 mm): shaft letters r, s, u may deviate 1–6 µm from sub-range tabulated
-  values
-- For `tolerance_stackup`: the RSS result does NOT guarantee 100 % conformance;
-  geometric tolerances (flatness, squareness) not modelled unless added explicitly
+```json
+{
+  "mcpServers": {
+    "tolerance": {
+      "command": "docker",
+      "args": [
+        "run",
+        "--rm",
+        "-i",
+        "ghcr.io/casys-ai/mcp-tolerance@sha256:fb84ac18847561c9003d0ca19111fa8ab2afe7e99dfcd325129de279dff01aea",
+        "stdio"
+      ]
+    }
+  }
+}
+```
 
-## Provenance
+The image is published for `linux/amd64` and `linux/arm64`. `latest` is a mutable
+convenience tag, not authority for a version or capability. In that digest,
+`/app/deno.json` is package version 0.2.0, but `/app/server.ts` still has legacy
+`VERSION` 0.1.0, so `server/discover` and health report runtime identity 0.1.0.
+This checkout prepares 0.3.0 with aligned package and server metadata; build a
+local image from source for unpublished behavior.
 
-All formulas and table values reference ISO 286-1:2010 explicitly:
-- IT grades 1–4: Table 1 (tabulated).
-- IT grades 5–12: Table 1 (tabulated; normative authority; formula diverges for
-  small diameters — e.g. IT6 @ 0–3 mm: formula gives 5 µm, table gives 6 µm).
-- IT grades 13–18: §B.2 formula `i = 0.45×D^(1/3) + 0.001×D` with ISO tiered
-  rounding.
-- Shaft clearance letters (c, d, e, f, g): Table 2 (tabulated es).
-- Shaft reference letter h: es = 0 by definition.
-- Shaft letter js: symmetric ±IT/2.
-- Shaft interference/transition letters (k, m, n, p, r, s, u): Table 3 (tabulated ei).
-- Hole letters C–G: EI = −es\_shaft (clearance holes).
-- Hole letter H: EI = 0 (reference hole).
-- Hole letters K–S: ES = −ei\_shaft (transition/interference holes).
+To build a two-mode image from this checkout instead:
 
-The normative cross-check script (`scripts/check_iso286_fixtures.ts`) verifies 203
-values from ISO 286-1:2010 Tables 1–3 against the engine; it exits 1 on any divergence.
+```bash
+docker build -t mcp-tolerance:local .
+
+# HTTP, exposed only on host loopback
+docker run --rm -p 127.0.0.1:3019:3019 mcp-tolerance:local http
+
+# stdio
+docker run --rm -i mcp-tolerance:local stdio
+```
+
+### Deno library
+
+The calculation engine and tool catalog are also exported without starting a server.
+This installs the published JSR package `@0.2.0`, not this checkout's prepared `0.3.0`
+identity:
+
+```bash
+deno add jsr:@casys/mcp-tolerance@0.2.0
+```
+
+```ts
+import { computeFit, fundamentalTolerance } from "@casys/mcp-tolerance";
+
+console.log(fundamentalTolerance(7, 25)); // 21 µm
+console.log(computeFit("H7", "g6", 25).fit); // clearance, 7–41 µm
+```
+
+## Capability map
+
+| Tool                    | Use it for                                                                         | Main result                                                          |
+| ----------------------- | ---------------------------------------------------------------------------------- | -------------------------------------------------------------------- |
+| `tolerance_it`          | IT grade 1–18 at a nominal diameter in `(0, 500]` mm                               | `IT_um` and selected diameter range                                  |
+| `tolerance_limits`      | One supported hole or shaft class, such as `H7`, `g6`, `JS9`, or `P6`              | Upper/lower deviations, IT width, and fundamental deviation in µm    |
+| `tolerance_fit`         | A base-hole `H` class paired with a supported shaft class                          | Hole/shaft deviations, fit type, and clearance/interference extremes |
+| `tolerance_fit_analyze` | Any supported uppercase hole class paired with any supported lowercase shaft class | Signed minimum/maximum clearance and fit type                        |
+| `tolerance_stackup`     | A linear 1D chain with bilateral or asymmetric contributor bounds                  | Aggregate nominal, worst-case interval, RSS interval, and per-contributor terms in mm |
+
+The tools have closed input/output schemas and read-only, idempotent MCP annotations.
+Every result includes `provenance`, `not_checked`, and an empty `violations` array.
+`violations` stays empty because these tools accept no application threshold against
+which to render a pass/fail verdict.
+
+### Supported ISO 286 positions
+
+- Hole positions: `C`, `D`, `E`, `F`, `G`, `H`, `JS`, `K`, `M`, `N`, `P`, `R`, `S`.
+- Shaft positions: `c`, `d`, `e`, `f`, `g`, `h`, `js`, `k`, `m`, `n`, `p`, `r`, `s`,
+  `u`.
+- IT grades: 1–18.
+- Nominal diameters: greater than 0 mm and at most 500 mm.
+
+`tolerance_fit` deliberately accepts only the base-hole position `H`. Use
+`tolerance_fit_analyze` for the other supported hole positions, including shaft-basis
+examples such as `G7/h6`. The extended tool mathematically combines any supported pair;
+it does not say that the pair is preferred, commonly manufactured, or suitable for the
+intended load, material, process, or assembly method.
+
+### Units and signs
+
+- Nominal diameters and stack-up nominal dimensions are entered in millimetres.
+- ISO fit deviations and contributor tolerance offsets are entered or returned in
+  micrometres (`1 µm = 0.001 mm`).
+- For holes, `EI` is the lower deviation and `ES` is the upper deviation.
+- For shafts, `ei` is the lower deviation and `es` is the upper deviation.
+- An absolute size limit is `nominal_diameter_mm + deviation_um / 1000`.
+- Signed clearance is `hole size - shaft size`: positive is clearance and negative is
+  interference.
+- Diameter ranges are lower-exclusive and upper-inclusive: `[18, 30]` means
+  `18 < diameter <= 30` mm.
+
+For `tolerance_fit`, the clearance and interference fields are two signed views of the
+same extremes. A negative `max_interference_um` in a clearance fit does not mean that
+interference occurs. `fit.type` or the signed `clearance_min_um` / `clearance_max_um`
+from `tolerance_fit_analyze` are usually the clearest fields to consume.
+
+## 1D stack-up example
+
+Each contributor supplies a nominal dimension in mm, non-negative upper and lower
+offsets in µm, and a direction. `+1` adds to the assembly result; `-1` subtracts from
+it.
+
+```json
+{
+  "contributors": [
+    {
+      "name": "housing depth",
+      "nominal_mm": 10,
+      "plus_um": 50,
+      "minus_um": 50,
+      "direction": 1
+    },
+    {
+      "name": "component stack",
+      "nominal_mm": 9.8,
+      "plus_um": 30,
+      "minus_um": 20,
+      "direction": -1
+    }
+  ]
+}
+```
+
+This produces a nominal gap of 0.200 mm, a worst-case interval of 0.120–0.270 mm, and an
+RSS interval of approximately 0.142–0.254 mm. Asymmetric tolerances are handled on their
+respective upper and lower sides. Until 0.3.0 is published, `contributor_breakdown` is
+available from this checkout or a local image build. The same terms that form those
+aggregates are returned in `contributor_breakdown`, in input order:
+
+```json
+{
+  "nominal_mm": 0.2,
+  "contributor_count": 2,
+  "worst_case_min_mm": 0.12,
+  "worst_case_max_mm": 0.27,
+  "contributor_breakdown": [
+    {
+      "name": "housing depth",
+      "signed_nominal_mm": 10,
+      "worst_case_upper_excursion_mm": 0.05,
+      "worst_case_lower_excursion_mm": 0.05,
+      "rss_upper_sq_mm2": 0.0025,
+      "rss_lower_sq_mm2": 0.0025
+    },
+    {
+      "name": "component stack",
+      "signed_nominal_mm": -9.8,
+      "worst_case_upper_excursion_mm": 0.02,
+      "worst_case_lower_excursion_mm": 0.03,
+      "rss_upper_sq_mm2": 0.0004,
+      "rss_lower_sq_mm2": 0.0009
+    }
+  ]
+}
+```
+
+Summing `signed_nominal_mm` recovers `nominal_mm`. Adding the upper excursions to the
+nominal recovers `worst_case_max_mm`; subtracting the lower excursions recovers
+`worst_case_min_mm`. The RSS bounds are `nominal_mm ± sqrt(Σ rss_*_sq_mm2)` on each
+side. Direction `-1` maps `minus_um` onto the assembly upper side and `plus_um` onto
+the assembly lower side. The array is not a sensitivity ranking and does not include
+percentage shares.
+
+The worst-case interval covers every combination only if every supplied dimension stays
+inside its stated bounds and the linear 1D chain contains every material contributor. It
+is not by itself a guarantee of assembly conformance: the caller must compare the result
+with an explicit acceptance interval.
+
+RSS is a statistical estimate. Its interpretation requires independent, centred
+processes and tolerance offsets expressed with a consistent sigma convention. The tool
+does not infer distributions, covariance, process capability, confidence, yield, or a
+pass/fail threshold, and it does not run Monte Carlo simulation.
+
+## Boundaries
+
+The fit tools calculate size tolerances only. They do not model or verify:
+
+- actual measurements or inspection uncertainty;
+- surface roughness, circularity, cylindricity, flatness, squareness, parallelism, or
+  other geometric tolerances;
+- temperature-dependent expansion;
+- material behaviour, lubrication, assembly force, press-fit stress, retained stress,
+  wear, or fatigue;
+- whether a class pair is a preferred ISO fit or is appropriate for an application;
+- nominal diameters outside `(0, 500]` mm; or
+- ISO positions outside the supported lists above.
+
+The engine uses the 13 main diameter ranges. For `r`, `s`, and `u`, ISO tables contain
+finer sub-ranges in places; the current implementation uses the first sub-range value
+for the containing main range. Results can therefore differ by 1–6 µm from the exact
+sub-range value. Do not use those positions where that difference is material without
+checking the applicable table directly.
+
+The stack-up tool is scalar and linear. It has no vector loops, datum scheme, assembly
+sequence, sensitivity ranking, geometric model, or automatic link from an ISO fit
+result into a chain. `contributor_breakdown` reports each input contributor's signed
+nominal and the worst-case/RSS terms used to form the aggregates, in input order; it
+is not a ranking. Add every relevant effect as an explicit contributor or use a more
+complete analysis method.
+
+This project implements the 2010 edition named above; it does not claim to represent a
+newer edition. It is not an official ISO publication or certification service. For
+regulated or safety-critical work, verify the calculation independently against the
+licensed standard and the governing design requirements.
+
+## Deployment safety
+
+The calculation handlers are deterministic TypeScript. They do not call an LLM, execute
+user-supplied code, invoke a native solver, modify files, or contact an upstream
+service.
+
+HTTP authentication and TLS are not enabled by this repository's default server
+configuration. The Deno entry point binds to `127.0.0.1`; the container listens on
+`0.0.0.0` internally so Docker can publish it. Keep the host mapping on loopback for
+local use. Put authentication, TLS, request limits, and network policy in front of the
+server before any shared or internet-facing deployment. CORS is not authentication.
+
+Security reports: see [SECURITY.md](SECURITY.md).
+
+## Relationship to Casys Digital Thread
+
+Casys Digital Thread deploys this server's published image as an optional, digest-pinned
+engineering provider on port 3019. This repository owns the calculation contract only.
+Digital Thread owns operation registration, orchestration, authorization, persistence,
+and review state.
+
+An MCP response from this server is therefore not automatically a canonical Thread
+document, captured evidence, an approved decision, or a manufacturing verdict. The
+provider can also be used independently of Digital Thread.
+
+## Provenance and verification
+
+The implementation references ISO 286-1:2010 as follows:
+
+- IT1–IT12: Table 1 values stored by main diameter range;
+- IT13–IT18: the tolerance-factor formula `i = 0.45 * D^(1/3) + 0.001 * D`, using the
+  selected range's geometric-mean diameter and tiered rounding;
+- shaft positions `c`–`g`: tabulated upper deviations;
+- shaft `h`: `es = 0`, and `js`: split symmetrically around zero;
+- shaft positions `k`, `m`, `n`, `p`, `r`, `s`, `u`: tabulated lower deviations;
+- hole `H`: `EI = 0`, and `JS`: split symmetrically around zero;
+- hole positions `C`–`G`: derived from the corresponding shaft upper deviation; and
+- hole positions `K`, `M`, `N`, `P`, `R`, `S`: derived from the corresponding shaft
+  lower deviation.
+
+The repository fixture check compares stored expectations transcribed from Tables 1–3
+with the calculation engine and fails on any mismatch:
+
+```bash
+deno run --allow-read scripts/check_iso286_fixtures.ts
+```
+
+For development from a checkout:
+
+```bash
+deno task serve          # http://127.0.0.1:3019/mcp
+deno task test
+deno task release:check  # format + type-check + lint + tests
+```
+
+MIT licensed. See [LICENSE](LICENSE).

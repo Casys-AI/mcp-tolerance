@@ -575,6 +575,144 @@ Deno.test("tolerance_stackup rejects negative plus_um", () => {
   );
 });
 
+type StackupBreakdownItem = {
+  name: string;
+  signed_nominal_mm: number;
+  worst_case_upper_excursion_mm: number;
+  worst_case_lower_excursion_mm: number;
+  rss_upper_sq_mm2: number;
+  rss_lower_sq_mm2: number;
+};
+
+function reconstructStackup(items: StackupBreakdownItem[]) {
+  const nominal_mm = items.reduce((acc, item) => acc + item.signed_nominal_mm, 0);
+  const worstCaseUpper = items.reduce(
+    (acc, item) => acc + item.worst_case_upper_excursion_mm,
+    0,
+  );
+  const worstCaseLower = items.reduce(
+    (acc, item) => acc + item.worst_case_lower_excursion_mm,
+    0,
+  );
+  const rssUpperSq = items.reduce((acc, item) => acc + item.rss_upper_sq_mm2, 0);
+  const rssLowerSq = items.reduce((acc, item) => acc + item.rss_lower_sq_mm2, 0);
+  return {
+    nominal_mm,
+    worst_case_max_mm: nominal_mm + worstCaseUpper,
+    worst_case_min_mm: nominal_mm - worstCaseLower,
+    rss_max_mm: nominal_mm + Math.sqrt(rssUpperSq),
+    rss_min_mm: nominal_mm - Math.sqrt(rssLowerSq),
+  };
+}
+
+Deno.test(
+  "tolerance_stackup contributor_breakdown preserves order and reconstructs aggregates",
+  () => {
+    const tool = allTools.find((t) => t.name === "tolerance_stackup");
+    assert(tool);
+    const contributors = [
+      {
+        name: "housing depth",
+        nominal_mm: 50.0,
+        plus_um: 100,
+        minus_um: 40,
+        direction: 1,
+      },
+      {
+        name: "shaft length",
+        nominal_mm: 40.0,
+        plus_um: 80,
+        minus_um: 25,
+        direction: -1,
+      },
+      {
+        name: "end play",
+        nominal_mm: 2.0,
+        plus_um: 10,
+        minus_um: 10,
+        direction: 1,
+      },
+    ];
+    const r = tool.handler({ contributors }) as {
+      structuredContent: Record<string, unknown>;
+    };
+    const sc = r.structuredContent;
+    const breakdown = sc.contributor_breakdown as StackupBreakdownItem[];
+
+    assertEquals(Array.isArray(breakdown), true);
+    assertEquals(breakdown.length, contributors.length);
+    assertEquals(
+      breakdown.map((item) => item.name),
+      ["housing depth", "shaft length", "end play"],
+    );
+    // direction=+1 uses plus for the upper excursion and minus for the lower.
+    assertEquals(breakdown[0], {
+      name: "housing depth",
+      signed_nominal_mm: 50,
+      worst_case_upper_excursion_mm: 100 / 1000,
+      worst_case_lower_excursion_mm: 40 / 1000,
+      rss_upper_sq_mm2: (100 / 1000) * (100 / 1000),
+      rss_lower_sq_mm2: (40 / 1000) * (40 / 1000),
+    });
+    // direction=−1 swaps plus/minus onto the opposite assembly side.
+    assertEquals(breakdown[1], {
+      name: "shaft length",
+      signed_nominal_mm: -40,
+      worst_case_upper_excursion_mm: 25 / 1000,
+      worst_case_lower_excursion_mm: 80 / 1000,
+      rss_upper_sq_mm2: (25 / 1000) * (25 / 1000),
+      rss_lower_sq_mm2: (80 / 1000) * (80 / 1000),
+    });
+    assertEquals(breakdown[2], {
+      name: "end play",
+      signed_nominal_mm: 2,
+      worst_case_upper_excursion_mm: 10 / 1000,
+      worst_case_lower_excursion_mm: 10 / 1000,
+      rss_upper_sq_mm2: (10 / 1000) * (10 / 1000),
+      rss_lower_sq_mm2: (10 / 1000) * (10 / 1000),
+    });
+    for (const item of breakdown) {
+      assert(item.worst_case_upper_excursion_mm >= 0);
+      assert(item.worst_case_lower_excursion_mm >= 0);
+      assert(item.rss_upper_sq_mm2 >= 0);
+      assert(item.rss_lower_sq_mm2 >= 0);
+    }
+
+    const reconstructed = reconstructStackup(breakdown);
+    assertEquals(reconstructed.nominal_mm, sc.nominal_mm);
+    assertEquals(reconstructed.worst_case_max_mm, sc.worst_case_max_mm);
+    assertEquals(reconstructed.worst_case_min_mm, sc.worst_case_min_mm);
+    assertEquals(reconstructed.rss_max_mm, sc.rss_max_mm);
+    assertEquals(reconstructed.rss_min_mm, sc.rss_min_mm);
+    assertEquals(sc.violations, []);
+  },
+);
+
+Deno.test(
+  "tolerance_stackup outputSchema requires a closed contributor_breakdown item",
+  () => {
+    const tool = allTools.find((t) => t.name === "tolerance_stackup");
+    assert(tool);
+    const schema = tool.outputSchema as Record<string, unknown>;
+    const required = schema.required as string[];
+    assert(required.includes("contributor_breakdown"));
+    const properties = schema.properties as Record<string, Record<string, unknown>>;
+    const breakdown = properties.contributor_breakdown;
+    assertEquals(breakdown.type, "array");
+    const items = breakdown.items as Record<string, unknown>;
+    assertEquals(items.type, "object");
+    assertEquals(items.additionalProperties, false);
+    assertEquals(items.required, [
+      "name",
+      "signed_nominal_mm",
+      "worst_case_upper_excursion_mm",
+      "worst_case_lower_excursion_mm",
+      "rss_upper_sq_mm2",
+      "rss_lower_sq_mm2",
+    ]);
+  },
+);
+
 // ── Output schema contracts ────────────────────────────────────────────────
 
 Deno.test("All tolerance tools declare closed outputSchemas with required fields", () => {
@@ -638,7 +776,7 @@ Deno.test("tolerance_it tool handler returns IT7 = 21 µm at 25 mm", () => {
   assertEquals(result.structuredContent.provenance, "ISO 286-1:2010 formulas/tables");
 });
 
-Deno.test("Five tolerance tools are registered", () => {
+Deno.test("registered tolerance tools match the public capability surface", () => {
   const names = allTools.map((t) => t.name).sort();
   assertEquals(names, [
     "tolerance_fit",
@@ -730,7 +868,7 @@ Deno.test(
       const discoverResult = discovered.body.result as Record<string, unknown>;
       assertEquals(discoverResult.serverInfo, {
         name: "mcp-tolerance",
-        version: "0.1.0",
+        version: "0.3.0",
       });
 
       const listed = await rpc(url, "tools/list");

@@ -3,7 +3,7 @@
 import { McpApp } from "@casys/mcp-server";
 import { ToleranceToolsClient } from "./src/client.ts";
 
-const VERSION = "0.1.0";
+const VERSION = "0.3.0";
 const DEFAULT_PORT = 3019;
 const DEFAULT_HOSTNAME = "127.0.0.1";
 
@@ -27,7 +27,8 @@ export function createToleranceServer(
     instructions: "ISO 286-1:2010 dimensional tolerance oracle. " +
       "Computes hole and shaft deviation limits (EI/ES, ei/es), fundamental " +
       "tolerance IT values, and fit type (clearance/transition/interference) " +
-      "from the standard formulas and tables. " +
+      "from the standard formulas and tables. It also computes linear 1D " +
+      "dimension-chain bounds with worst-case and RSS intervals. " +
       "All results carry an explicit provenance field. " +
       "No verdict — the tools report limits; the caller assesses fit suitability.",
     logger: options.logger ??

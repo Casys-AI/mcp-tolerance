@@ -4,8 +4,9 @@
  * MCP oracle for ISO 286-1:2010 dimensional tolerances and fits.
  * Computes fundamental tolerance IT values, hole/shaft deviation limits
  * (EI/ES, ei/es), and fit type (clearance/transition/interference) from
- * the normative formulas and tables — no external binaries, no LLM, no
- * process defaults. Every result carries an explicit provenance field.
+ * the normative formulas and tables. It also computes linear 1D stack-up
+ * worst-case and RSS intervals — no external binaries, no LLM, no process
+ * defaults. Every result carries an explicit provenance field.
  *
  * @module
  */

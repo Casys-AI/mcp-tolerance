@@ -2,6 +2,15 @@
 
 All notable changes to `@casys/mcp-tolerance` are documented here.
 
+## 0.3.0 — 2026-08-24
+
+- `tolerance_stackup` now returns a required `contributor_breakdown` array in
+  `structuredContent`. Each item preserves input order and reports `name`,
+  `signed_nominal_mm`, non-negative `worst_case_upper_excursion_mm` /
+  `worst_case_lower_excursion_mm`, and `rss_upper_sq_mm2` / `rss_lower_sq_mm2`.
+  These are the same terms used to form the existing aggregate bounds. Aggregate
+  fields and no-verdict semantics are unchanged.
+
 ## 0.2.0
 
 - `scripts/stdio-shim.ts`: stdio → stateless-HTTP adapter. Classic-SDK stdio clients
@@ -39,8 +48,9 @@ All notable changes to `@casys/mcp-tolerance` are documented here.
 
 - `tolerance_stackup` — worst-case arithmetic and RSS (Root Sum Square) dimension chain
   stackup. Inputs: array of contributors with nominal_mm, plus_um, minus_um, direction
-  (±1). Outputs: nominal_mm, worst_case_min/max_mm, rss_min/max_mm. Worst-case
-  guarantees 100 % conformance; RSS is statistical.
+  (±1). Outputs: nominal_mm, worst_case_min/max_mm, rss_min/max_mm. Worst-case bounds
+  every combination of the supplied intervals; RSS is statistical. Neither result is
+  an acceptance verdict without a caller-declared threshold.
 
 - Engine cross-validation against ISO 286-1:2010 Tables 1–3:
   - IT6 @ 0–3 mm = 6 µm (formula gives 5 — table is normative) ✓
@@ -65,7 +75,7 @@ All notable changes to `@casys/mcp-tolerance` are documented here.
 - Pure TypeScript engine — no external binaries, no subprocess, no LLM. All formulas and
   table values are in `src/api/iso286.ts` with inline provenance references.
 
-- 82 unit and integration tests; `deno task release:check` passes.
+- Unit and integration coverage; `deno task release:check` passes.
 
 ### Engine provenance
 
