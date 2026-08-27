@@ -72,18 +72,21 @@ limits:
 }
 ```
 
-The previously published multi-architecture 0.3.0 image exposes the HTTP server. Its
-immutable digest keeps the package and server runtime identities aligned at 0.3.0:
+### Published 0.3.1 Docker image
+
+The published multi-architecture 0.3.1 release-code image is available for
+`linux/amd64` and `linux/arm64`; its revision matches the 0.3.1 release commit. Its
+entrypoint is `./docker-entrypoint.sh` and its `CMD` is `http`, so this command starts
+the stateless HTTP transport:
 
 ```bash
 docker run --rm \
   -p 127.0.0.1:3019:3019 \
-  ghcr.io/casys-ai/mcp-tolerance@sha256:4f5327808e09b18a8bd496653d85fc57fad02b1831d88b18dad0acc40c522b52 \
+  ghcr.io/casys-ai/mcp-tolerance@sha256:2a0f4931d23894d7777871beefc7130d30a9b3efa0e253a3f402bdb534ca0ec3 \
   http
 ```
 
-The image is published for `linux/amd64` and `linux/arm64`. `latest` is a mutable
-convenience tag, not authority for a version or capability.
+`latest` is a mutable convenience tag, not authority for a version or capability.
 
 ### stdio for desktop MCP clients
 
@@ -108,12 +111,8 @@ child:
 }
 ```
 
-The 0.3.0 image digest above remains an HTTP-only artifact. To use version 0.3.1 from a
-checkout-built image instead:
-
-```bash
-docker build -t mcp-tolerance:local .
-```
+The same published image runs native stdio when `stdio` is passed to Docker. It
+overrides the image's `CMD http`; it does not start an HTTP child:
 
 ```json
 {
@@ -124,7 +123,7 @@ docker build -t mcp-tolerance:local .
         "run",
         "--rm",
         "-i",
-        "mcp-tolerance:local",
+        "ghcr.io/casys-ai/mcp-tolerance@sha256:2a0f4931d23894d7777871beefc7130d30a9b3efa0e253a3f402bdb534ca0ec3",
         "stdio"
       ]
     }
@@ -132,9 +131,11 @@ docker build -t mcp-tolerance:local .
 }
 ```
 
-The checkout-built image keeps both transports:
+To build an image from a checkout for local development instead:
 
 ```bash
+docker build -t mcp-tolerance:local .
+
 # HTTP, exposed only on host loopback
 docker run --rm -p 127.0.0.1:3019:3019 mcp-tolerance:local http
 
