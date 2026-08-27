@@ -16,15 +16,15 @@ for an application, or declare a design conformant.
 
 ### Stateless HTTP from JSR
 
-The published [JSR package](https://jsr.io/@casys/mcp-tolerance) `@0.3.0` starts on
-loopback by default. Package and server runtime identities are aligned at 0.3.0:
+Version 0.3.1 starts on loopback by default. Package and server runtime identities are
+aligned at 0.3.1:
 
 ```bash
 deno run \
   --allow-net=127.0.0.1:3019 \
   --allow-env \
   --allow-read=mcp-server.yaml \
-  jsr:@casys/mcp-tolerance@0.3.0/server \
+  jsr:@casys/mcp-tolerance@0.3.1/server \
   --port=3019
 ```
 
@@ -72,10 +72,48 @@ limits:
 }
 ```
 
+The previously published multi-architecture 0.3.0 image exposes the HTTP server. Its
+immutable digest keeps the package and server runtime identities aligned at 0.3.0:
+
+```bash
+docker run --rm \
+  -p 127.0.0.1:3019:3019 \
+  ghcr.io/casys-ai/mcp-tolerance@sha256:4f5327808e09b18a8bd496653d85fc57fad02b1831d88b18dad0acc40c522b52 \
+  http
+```
+
+The image is published for `linux/amd64` and `linux/arm64`. `latest` is a mutable
+convenience tag, not authority for a version or capability.
+
 ### stdio for desktop MCP clients
 
-The container's `stdio` mode adapts classic MCP clients to the server's stateless HTTP
-transport. This digest is the published multi-architecture 0.3.0 image:
+Version 0.3.1 provides native stdio and handles legacy `2025-06-18` `initialize`
+clients directly. A desktop MCP client can run the JSR server without an internal HTTP
+child:
+
+```json
+{
+  "mcpServers": {
+    "tolerance": {
+      "command": "deno",
+      "args": [
+        "run",
+        "--allow-env",
+        "--allow-read=mcp-server.yaml",
+        "jsr:@casys/mcp-tolerance@0.3.1/server",
+        "--stdio"
+      ]
+    }
+  }
+}
+```
+
+The 0.3.0 image digest above remains an HTTP-only artifact. To use version 0.3.1 from a
+checkout-built image instead:
+
+```bash
+docker build -t mcp-tolerance:local .
+```
 
 ```json
 {
@@ -86,7 +124,7 @@ transport. This digest is the published multi-architecture 0.3.0 image:
         "run",
         "--rm",
         "-i",
-        "ghcr.io/casys-ai/mcp-tolerance@sha256:4f5327808e09b18a8bd496653d85fc57fad02b1831d88b18dad0acc40c522b52",
+        "mcp-tolerance:local",
         "stdio"
       ]
     }
@@ -94,15 +132,9 @@ transport. This digest is the published multi-architecture 0.3.0 image:
 }
 ```
 
-The image is published for `linux/amd64` and `linux/arm64`. `latest` is a mutable
-convenience tag, not authority for a version or capability. In that digest, package and
-server runtime identities are aligned at 0.3.0.
-
-To build a two-mode image from this checkout instead:
+The checkout-built image keeps both transports:
 
 ```bash
-docker build -t mcp-tolerance:local .
-
 # HTTP, exposed only on host loopback
 docker run --rm -p 127.0.0.1:3019:3019 mcp-tolerance:local http
 
@@ -113,10 +145,10 @@ docker run --rm -i mcp-tolerance:local stdio
 ### Deno library
 
 The calculation engine and tool catalog are also exported without starting a server.
-This installs the published JSR package `@0.3.0`:
+To install version 0.3.1:
 
 ```bash
-deno add jsr:@casys/mcp-tolerance@0.3.0
+deno add jsr:@casys/mcp-tolerance@0.3.1
 ```
 
 ```ts

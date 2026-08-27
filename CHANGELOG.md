@@ -2,6 +2,13 @@
 
 All notable changes to `@casys/mcp-tolerance` are documented here.
 
+## Unreleased
+
+## 0.3.1 — 2026-08-27
+
+- Stdio now uses the native era-aware MCP transport directly. Legacy `2025-06-18`
+  initialization and an end-to-end `tolerance_it` call are covered.
+
 ## 0.3.0 — 2026-08-24
 
 - `tolerance_stackup` now returns a required `contributor_breakdown` array in

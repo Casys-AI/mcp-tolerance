@@ -9,12 +9,11 @@ WORKDIR /app
 COPY deno.json deno.lock ./
 COPY server.ts mod.ts ./
 COPY src/ ./src/
-COPY scripts/ ./scripts/
 COPY docker-entrypoint.sh ./
 
 # Pre-cache all transitive deps using the committed lock file.
 # --frozen ensures we never silently drift from the committed lock.
-RUN deno cache --frozen server.ts scripts/stdio-shim.ts
+RUN deno cache --frozen server.ts
 
 EXPOSE 3019
 

@@ -794,17 +794,39 @@ Deno.test("All 13 diameter ranges are covered by DIAMETER_RANGES", () => {
 // ── CLI parsing ────────────────────────────────────────────────────────────
 
 Deno.test("parseCli returns default port 3019 when no args given", () => {
-  const opts = parseCli([]);
-  assertEquals(opts.port, 3019);
-  assertEquals(opts.hostname, "127.0.0.1");
+  assertEquals(parseCli([]), {
+    mode: "http",
+    port: 3019,
+    hostname: "127.0.0.1",
+  });
 });
 
 Deno.test("parseCli accepts --port=3030", () => {
-  assertEquals(parseCli(["--port=3030"]).port, 3030);
+  assertEquals(parseCli(["--port=3030"]), {
+    mode: "http",
+    port: 3030,
+    hostname: "127.0.0.1",
+  });
 });
 
 Deno.test("parseCli accepts --port 3031", () => {
-  assertEquals(parseCli(["--port", "3031"]).port, 3031);
+  assertEquals(parseCli(["--port", "3031"]), {
+    mode: "http",
+    port: 3031,
+    hostname: "127.0.0.1",
+  });
+});
+
+Deno.test("parseCli accepts exact --stdio mode", () => {
+  assertEquals(parseCli(["--stdio"]), { mode: "stdio" });
+});
+
+Deno.test("parseCli rejects --stdio mixed with HTTP options", () => {
+  assertThrows(
+    () => parseCli(["--stdio", "--port=3019"]),
+    TypeError,
+    "--stdio cannot be combined with HTTP options",
+  );
 });
 
 Deno.test("parseCli rejects unknown argument", () => {
@@ -868,7 +890,7 @@ Deno.test(
       const discoverResult = discovered.body.result as Record<string, unknown>;
       assertEquals(discoverResult.serverInfo, {
         name: "mcp-tolerance",
-        version: "0.3.0",
+        version: "0.3.1",
       });
 
       const listed = await rpc(url, "tools/list");
