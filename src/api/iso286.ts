@@ -2,16 +2,16 @@
  * ISO 286-1:2010 fundamental tolerance and deviation engine.
  *
  * Provenance: "ISO 286-1:2010 §B.2 (tolerance factor i), Table 1 (IT grades
- * 1–12 tabulated), Table B.1 (IT multipliers for grades 13–18), Table 2
- * (fundamental deviations for clearance shaft letters c–g), Table 3
- * (fundamental deviations for interference shaft letters k–u and n)."
+ * 1–12 tabulated), Table B.1 (IT multipliers for grades 13–18), Table 4
+ * (fundamental deviations for clearance shaft letters c–g), Table 5
+ * (fundamental deviations for transition/interference shaft letters k–u)."
  *
  * Design note — tables over formulas for IT1–IT12 and clearance shafts:
  * The ISO 286-1 formula i=0.45D^(1/3)+0.001D produces values that match the
  * published Table 1 for diameters above ~10 mm. For smaller diameters (0–3
  * and 3–6 mm) the computed IT6 from the formula gives 5 µm and 7 µm
  * respectively, while the normative Table 1 says 6 µm and 8 µm. Similarly,
- * the formula for shaft g gives es=−3 µm for 0–3 mm while Table 2 says −2 µm.
+ * the formula for shaft g gives es=−3 µm for 0–3 mm while Table 4 says −2 µm.
  * This engine therefore uses the tabulated values for IT1–IT12 and for all
  * clearance shaft letters (c, d, e, f, g), which are the normative authority.
  * Formula is retained only for IT13–IT18 where no discrepancy has been
@@ -200,9 +200,10 @@ export function fundamentalTolerance(grade: number, diameterMm: number): number 
 // ── Clearance shaft deviations (tabulated) ────────────────────────────────
 
 /**
- * Upper deviation es in µm for clearance shaft letters c, d, e, f, g.
- * Indexed by range index 0–12.
- * Source: ISO 286-1:2010 Table 2.
+ * Upper deviation es in µm for clearance shaft letters d, e, f, g.
+ * Indexed by the 13 Table 1 diameter ranges. Shaft c uses the finer Table 4
+ * sub-ranges below.
+ * Source: ISO 286-1:2010 Table 4.
  *
  * Tabulated values prevail over formula for small diameters. Known formula/
  * table divergences (formula, table):
@@ -213,49 +214,240 @@ export function fundamentalTolerance(grade: number, diameterMm: number): number 
  *   So g formula diverges only at 0–3 mm.
  */
 const CLEARANCE_SHAFT_ES_TABLE: ReadonlyMap<string, readonly number[]> = new Map([
-  // c: ISO 286-1:2010 Table 2
-  ["c", [-60, -70, -80, -95, -110, -120, -130, -140, -150, -170, -190, -210, -230]],
-  // d: ISO 286-1:2010 Table 2
+  // d: ISO 286-1:2010 Table 4
   ["d", [-20, -30, -40, -50, -65, -80, -100, -120, -145, -170, -190, -210, -230]],
-  // e: ISO 286-1:2010 Table 2
+  // e: ISO 286-1:2010 Table 4
   ["e", [-14, -20, -25, -32, -40, -50, -60, -72, -85, -100, -110, -125, -135]],
-  // f: ISO 286-1:2010 Table 2
+  // f: ISO 286-1:2010 Table 4
   ["f", [-6, -10, -13, -16, -20, -25, -30, -36, -43, -50, -56, -62, -68]],
-  // g: ISO 286-1:2010 Table 2
+  // g: ISO 286-1:2010 Table 4
   ["g", [-2, -4, -5, -6, -7, -9, -10, -12, -14, -15, -17, -18, -20]],
 ]);
+
+/**
+ * Upper deviation es in µm for shaft c. Table 4 splits this position more
+ * finely than the 13 Table 1 IT-grade ranges. Each tuple is
+ * [upperInclusiveMm, esUm].
+ *
+ * Source: ISO 286-1:2010 Table 4. The size intervals are lower-exclusive and
+ * upper-inclusive, matching the standard's “above / up to and including” form.
+ */
+const SHAFT_ES_SUBRANGE_TABLE: ReadonlyMap<
+  string,
+  readonly (readonly [upperInclusiveMm: number, esUm: number])[]
+> = new Map([
+  [
+    "c",
+    [
+      [3, -60],
+      [6, -70],
+      [10, -80],
+      [18, -95],
+      [30, -110],
+      [40, -120],
+      [50, -130],
+      [65, -140],
+      [80, -150],
+      [100, -170],
+      [120, -180],
+      [140, -200],
+      [160, -210],
+      [180, -230],
+      [200, -240],
+      [225, -260],
+      [250, -280],
+      [280, -300],
+      [315, -330],
+      [355, -360],
+      [400, -400],
+      [450, -440],
+      [500, -480],
+    ],
+  ],
+]);
+
+function shaftFundamentalDeviationEs(
+  letter: string,
+  diameterMm: number,
+  rangeIndex: number,
+): number | undefined {
+  const subranges = SHAFT_ES_SUBRANGE_TABLE.get(letter);
+  if (subranges !== undefined) {
+    const match = subranges.find(([upperInclusiveMm]) =>
+      diameterMm <= upperInclusiveMm
+    );
+    if (match === undefined) {
+      throw new RangeError(
+        `No ISO 286-1 Table 4 sub-range is available for shaft ${letter} at ` +
+          `${diameterMm} mm.`,
+      );
+    }
+    return match[1];
+  }
+
+  return CLEARANCE_SHAFT_ES_TABLE.get(letter)?.[rangeIndex];
+}
 
 // ── Transition/interference shaft deviations (tabulated) ──────────────────
 
 /**
  * Lower deviation ei in µm for transition/interference shaft letters.
  * Indexed by range index 0–12.
- * Source: ISO 286-1:2010 Table 3.
+ * Source: ISO 286-1:2010 Table 5.
  *
  * Letter n: formula ei_n=round(5D^0.34) diverges at 80–120 mm
  * (formula→24, table→23). Tabulated value used throughout.
  *
- * Letters r, s, u: the standard provides sub-ranges within the 13 main ranges
- * (e.g. 50–65 and 65–80 within 50–80). This engine uses 13 main ranges only;
- * the first sub-range value is used for ranges with sub-ranges. Deviations of
- * 1–6 µm from the sub-range value are documented in not_checked.
+ * The ISO table splits r, s and u more finely than the 13 main diameter ranges
+ * used for IT grades. Those three positions are resolved below from their Table 5
+ * sub-ranges; the remaining supported positions use their Table 5 main-range
+ * values.
  */
 const SHAFT_EI_TABLE: ReadonlyMap<string, readonly number[]> = new Map([
   // k: ei=0 for D>3 mm (IT≤8); ei=+2 for D≤3 mm. ISO 286-1:2010 Table B.3 note.
   ["k", [2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]],
-  // m: ISO 286-1:2010 Table 3
+  // m: ISO 286-1:2010 Table 5
   ["m", [2, 4, 6, 7, 8, 9, 11, 13, 15, 17, 20, 21, 23]],
-  // n: ISO 286-1:2010 Table 3 (tabulated; formula diverges at 80–120 mm)
+  // n: ISO 286-1:2010 Table 5 (tabulated; formula diverges at 80–120 mm)
   ["n", [4, 8, 10, 12, 15, 17, 20, 23, 27, 31, 34, 37, 40]],
-  // p: ISO 286-1:2010 Table 3 — validated: 18–30 = 22 µm ✓
+  // p: ISO 286-1:2010 Table 5 — validated: 18–30 = 22 µm ✓
   ["p", [6, 12, 15, 18, 22, 26, 32, 37, 43, 50, 56, 62, 68]],
-  // r: ISO 286-1:2010 Table 3 (first sub-range value used)
-  ["r", [10, 15, 19, 23, 28, 34, 41, 51, 63, 77, 94, 108, 126]],
-  // s: ISO 286-1:2010 Table 3 (first sub-range value used)
-  ["s", [14, 19, 23, 28, 35, 43, 53, 59, 71, 79, 92, 100, 108]],
-  // u: ISO 286-1:2010 Table 3 (first sub-range value used)
-  ["u", [18, 23, 28, 33, 41, 48, 60, 70, 87, 102, 122, 139, 159]],
 ]);
+
+/**
+ * Lower deviation ei in µm for r, s and u, whose Table 5 size bands are
+ * finer than the Table 1 IT-grade bands. Each tuple is [upperInclusiveMm, ei].
+ *
+ * Source: ISO 286-1:2010 Table 5. The size intervals are lower-exclusive and
+ * upper-inclusive, matching the standard's “above / up to and including” form.
+ */
+const SHAFT_EI_SUBRANGE_TABLE: ReadonlyMap<
+  string,
+  readonly (readonly [upperInclusiveMm: number, eiUm: number])[]
+> = new Map([
+  [
+    "r",
+    [
+      [3, 10],
+      [6, 15],
+      [10, 19],
+      [18, 23],
+      [30, 28],
+      [50, 34],
+      [65, 41],
+      [80, 43],
+      [100, 51],
+      [120, 54],
+      [140, 63],
+      [160, 65],
+      [180, 68],
+      [200, 77],
+      [225, 80],
+      [250, 84],
+      [280, 94],
+      [315, 98],
+      [355, 108],
+      [400, 114],
+      [450, 126],
+      [500, 132],
+    ],
+  ],
+  [
+    "s",
+    [
+      [3, 14],
+      [6, 19],
+      [10, 23],
+      [18, 28],
+      [30, 35],
+      [50, 43],
+      [65, 53],
+      [80, 59],
+      [100, 71],
+      [120, 79],
+      [140, 92],
+      [160, 100],
+      [180, 108],
+      [200, 122],
+      [225, 130],
+      [250, 140],
+      [280, 158],
+      [315, 170],
+      [355, 190],
+      [400, 208],
+      [450, 232],
+      [500, 252],
+    ],
+  ],
+  [
+    "u",
+    [
+      [3, 18],
+      [6, 23],
+      [10, 28],
+      [14, 33],
+      [18, 39],
+      [24, 41],
+      [30, 48],
+      [40, 60],
+      [50, 70],
+      [65, 87],
+      [80, 102],
+      [100, 124],
+      [120, 144],
+      [140, 170],
+      [160, 190],
+      [180, 210],
+      [200, 236],
+      [225, 258],
+      [250, 284],
+      [280, 315],
+      [315, 350],
+      [355, 390],
+      [400, 435],
+      [450, 490],
+      [500, 540],
+    ],
+  ],
+]);
+
+function shaftFundamentalDeviationEi(
+  letter: string,
+  diameterMm: number,
+  rangeIndex: number,
+): number | undefined {
+  const subranges = SHAFT_EI_SUBRANGE_TABLE.get(letter);
+  if (subranges !== undefined) {
+    const match = subranges.find(([upperInclusiveMm]) =>
+      diameterMm <= upperInclusiveMm
+    );
+    if (match === undefined) {
+      throw new RangeError(
+        `No ISO 286-1 Table 5 sub-range is available for shaft ${letter} at ` +
+          `${diameterMm} mm.`,
+      );
+    }
+    return match[1];
+  }
+
+  return SHAFT_EI_TABLE.get(letter)?.[rangeIndex];
+}
+
+/**
+ * Engine table view used only by the repository's release fixture check.
+ *
+ * This keeps the check structurally coupled to the tables used at runtime:
+ * a fixture can neither omit a table cell nor silently add an unimplemented
+ * one. It is intentionally not re-exported from the package root.
+ */
+export const ISO286_TABLES_FOR_FIXTURE_CHECK = {
+  it1To4: IT1_TO_4_TABLE,
+  it5To12: IT5_TO_12_TABLE,
+  table4ShaftEs: Object.fromEntries(CLEARANCE_SHAFT_ES_TABLE),
+  table4ShaftEsSubranges: Object.fromEntries(SHAFT_ES_SUBRANGE_TABLE),
+  table5ShaftEi: Object.fromEntries(SHAFT_EI_TABLE),
+  table5ShaftEiSubranges: Object.fromEntries(SHAFT_EI_SUBRANGE_TABLE),
+} as const;
 
 // ── Public API ─────────────────────────────────────────────────────────────
 
@@ -321,16 +513,14 @@ export function shaftDeviations(
   }
 
   // Clearance letters c, d, e, f, g — tabulated es (negative)
-  const esTable = CLEARANCE_SHAFT_ES_TABLE.get(letter);
-  if (esTable !== undefined) {
-    const es = esTable[ri];
+  const es = shaftFundamentalDeviationEs(letter, diameterMm, ri);
+  if (es !== undefined) {
     return { es_um: es, ei_um: es - IT };
   }
 
   // Transition/interference letters k, m, n, p, r, s, u — tabulated ei (positive)
-  const eiTable = SHAFT_EI_TABLE.get(letter);
-  if (eiTable !== undefined) {
-    const ei = eiTable[ri];
+  const ei = shaftFundamentalDeviationEi(letter, diameterMm, ri);
+  if (ei !== undefined) {
     return { ei_um: ei, es_um: ei + IT };
   }
 
@@ -412,17 +602,15 @@ export function holeDeviations(
   const lower = letter.toLowerCase();
 
   // Clearance holes C–G: EI = −es_shaft, ES = EI + IT
-  const esTable = CLEARANCE_SHAFT_ES_TABLE.get(lower);
-  if (esTable !== undefined) {
-    const es = esTable[ri]; // es_shaft is negative
+  const es = shaftFundamentalDeviationEs(lower, diameterMm, ri);
+  if (es !== undefined) {
     const EI = -es; // EI_hole = positive
     return { EI_um: EI, ES_um: EI + IT };
   }
 
   // Interference/transition holes K, M, N, P, R, S: ES = −ei_shaft, EI = ES − IT
-  const eiTable = SHAFT_EI_TABLE.get(lower);
-  if (eiTable !== undefined) {
-    const ei = eiTable[ri]; // ei_shaft is positive
+  const ei = shaftFundamentalDeviationEi(lower, diameterMm, ri);
+  if (ei !== undefined) {
     const ES = -ei; // ES_hole = negative
     return { EI_um: ES - IT, ES_um: ES };
   }

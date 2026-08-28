@@ -21,7 +21,6 @@ const TOOL_NAME = "tolerance_limits";
 const NOT_CHECKED = [
   "Surface roughness and form tolerances are not included — this tool computes size limits only.",
   "Geometric tolerances (circularity, cylindricity) are not modelled.",
-  "Only the 13 main ISO 286-1 diameter ranges are used. Sub-ranges (e.g. 50–65 / 65–80 within 50–80) are not distinguished; shaft letters r, s, u may deviate 1–6 µm from sub-range tabulated values.",
   "Nominal diameters above 500 mm or at or below 0 mm are outside ISO 286-1 and will be rejected.",
   `Supported hole letters: ${
     SUPPORTED_HOLE_LETTERS.join(", ")

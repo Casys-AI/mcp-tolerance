@@ -16,15 +16,15 @@ for an application, or declare a design conformant.
 
 ### Stateless HTTP from JSR
 
-Version 0.3.1 starts on loopback by default. Package and server runtime identities are
-aligned at 0.3.1:
+Version 0.3.2 starts on loopback by default. Package and server runtime identities are
+aligned at 0.3.2:
 
 ```bash
 deno run \
   --allow-net=127.0.0.1:3019 \
   --allow-env \
   --allow-read=mcp-server.yaml \
-  jsr:@casys/mcp-tolerance@0.3.1/server \
+  jsr:@casys/mcp-tolerance@0.3.2/server \
   --port=3019
 ```
 
@@ -74,10 +74,10 @@ limits:
 
 ### Published 0.3.1 Docker image
 
-The published multi-architecture 0.3.1 release-code image is available for
-`linux/amd64` and `linux/arm64`; its revision matches the 0.3.1 release commit. Its
-entrypoint is `./docker-entrypoint.sh` and its `CMD` is `http`, so this command starts
-the stateless HTTP transport:
+The published multi-architecture 0.3.1 release-code image is available for `linux/amd64`
+and `linux/arm64`; its revision matches the 0.3.1 release commit. Its entrypoint is
+`./docker-entrypoint.sh` and its `CMD` is `http`, so this command starts the stateless
+HTTP transport:
 
 ```bash
 docker run --rm \
@@ -90,9 +90,8 @@ docker run --rm \
 
 ### stdio for desktop MCP clients
 
-Version 0.3.1 provides native stdio and handles legacy `2025-06-18` `initialize`
-clients directly. A desktop MCP client can run the JSR server without an internal HTTP
-child:
+Version 0.3.2 provides native stdio and handles legacy `2025-06-18` `initialize` clients
+directly. A desktop MCP client can run the JSR server without an internal HTTP child:
 
 ```json
 {
@@ -103,7 +102,7 @@ child:
         "run",
         "--allow-env",
         "--allow-read=mcp-server.yaml",
-        "jsr:@casys/mcp-tolerance@0.3.1/server",
+        "jsr:@casys/mcp-tolerance@0.3.2/server",
         "--stdio"
       ]
     }
@@ -145,11 +144,11 @@ docker run --rm -i mcp-tolerance:local stdio
 
 ### Deno library
 
-The calculation engine and tool catalog are also exported without starting a server.
-To install version 0.3.1:
+The calculation engine and tool catalog are also exported without starting a server. To
+install version 0.3.2:
 
 ```bash
-deno add jsr:@casys/mcp-tolerance@0.3.1
+deno add jsr:@casys/mcp-tolerance@0.3.2
 ```
 
 ```ts
@@ -161,12 +160,12 @@ console.log(computeFit("H7", "g6", 25).fit); // clearance, 7–41 µm
 
 ## Capability map
 
-| Tool                    | Use it for                                                                         | Main result                                                          |
-| ----------------------- | ---------------------------------------------------------------------------------- | -------------------------------------------------------------------- |
-| `tolerance_it`          | IT grade 1–18 at a nominal diameter in `(0, 500]` mm                               | `IT_um` and selected diameter range                                  |
-| `tolerance_limits`      | One supported hole or shaft class, such as `H7`, `g6`, `JS9`, or `P6`              | Upper/lower deviations, IT width, and fundamental deviation in µm    |
-| `tolerance_fit`         | A base-hole `H` class paired with a supported shaft class                          | Hole/shaft deviations, fit type, and clearance/interference extremes |
-| `tolerance_fit_analyze` | Any supported uppercase hole class paired with any supported lowercase shaft class | Signed minimum/maximum clearance and fit type                        |
+| Tool                    | Use it for                                                                         | Main result                                                                           |
+| ----------------------- | ---------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------- |
+| `tolerance_it`          | IT grade 1–18 at a nominal diameter in `(0, 500]` mm                               | `IT_um` and selected diameter range                                                   |
+| `tolerance_limits`      | One supported hole or shaft class, such as `H7`, `g6`, `JS9`, or `P6`              | Upper/lower deviations, IT width, and fundamental deviation in µm                     |
+| `tolerance_fit`         | A base-hole `H` class paired with a supported shaft class                          | Hole/shaft deviations, fit type, and clearance/interference extremes                  |
+| `tolerance_fit_analyze` | Any supported uppercase hole class paired with any supported lowercase shaft class | Signed minimum/maximum clearance and fit type                                         |
 | `tolerance_stackup`     | A linear 1D chain with bilateral or asymmetric contributor bounds                  | Aggregate nominal, worst-case interval, RSS interval, and per-contributor terms in mm |
 
 The tools have closed input/output schemas and read-only, idempotent MCP annotations.
@@ -268,8 +267,8 @@ in `contributor_breakdown`, in input order:
 Summing `signed_nominal_mm` recovers `nominal_mm`. Adding the upper excursions to the
 nominal recovers `worst_case_max_mm`; subtracting the lower excursions recovers
 `worst_case_min_mm`. The RSS bounds are `nominal_mm ± sqrt(Σ rss_*_sq_mm2)` on each
-side. Direction `-1` maps `minus_um` onto the assembly upper side and `plus_um` onto
-the assembly lower side. The array is not a sensitivity ranking and does not include
+side. Direction `-1` maps `minus_um` onto the assembly upper side and `plus_um` onto the
+assembly lower side. The array is not a sensitivity ranking and does not include
 percentage shares.
 
 The worst-case interval covers every combination only if every supplied dimension stays
@@ -296,18 +295,17 @@ The fit tools calculate size tolerances only. They do not model or verify:
 - nominal diameters outside `(0, 500]` mm; or
 - ISO positions outside the supported lists above.
 
-The engine uses the 13 main diameter ranges. For `r`, `s`, and `u`, ISO tables contain
-finer sub-ranges in places; the current implementation uses the first sub-range value
-for the containing main range. Results can therefore differ by 1–6 µm from the exact
-sub-range value. Do not use those positions where that difference is material without
-checking the applicable table directly.
+IT grades use the 13 main diameter ranges from ISO 286-1:2010 Table 1. Shaft position
+`c` independently resolves the finer nominal-size sub-ranges in Table 4; positions `r`,
+`s`, and `u` do so in Table 5. The returned `diameter_range_mm` remains the Table 1
+IT-grade range, rather than the finer fundamental-deviation range.
 
 The stack-up tool is scalar and linear. It has no vector loops, datum scheme, assembly
-sequence, sensitivity ranking, geometric model, or automatic link from an ISO fit
-result into a chain. `contributor_breakdown` reports each input contributor's signed
-nominal and the worst-case/RSS terms used to form the aggregates, in input order; it
-is not a ranking. Add every relevant effect as an explicit contributor or use a more
-complete analysis method.
+sequence, sensitivity ranking, geometric model, or automatic link from an ISO fit result
+into a chain. `contributor_breakdown` reports each input contributor's signed nominal
+and the worst-case/RSS terms used to form the aggregates, in input order; it is not a
+ranking. Add every relevant effect as an explicit contributor or use a more complete
+analysis method.
 
 This project implements the 2010 edition named above; it does not claim to represent a
 newer edition. It is not an official ISO publication or certification service. For
@@ -346,16 +344,19 @@ The implementation references ISO 286-1:2010 as follows:
 - IT1–IT12: Table 1 values stored by main diameter range;
 - IT13–IT18: the tolerance-factor formula `i = 0.45 * D^(1/3) + 0.001 * D`, using the
   selected range's geometric-mean diameter and tiered rounding;
-- shaft positions `c`–`g`: tabulated upper deviations;
+- shaft positions `c`–`g`: tabulated upper deviations from Table 4, with Table 4
+  sub-range lookup for `c`;
 - shaft `h`: `es = 0`, and `js`: split symmetrically around zero;
-- shaft positions `k`, `m`, `n`, `p`, `r`, `s`, `u`: tabulated lower deviations;
+- shaft positions `k`, `m`, `n`, `p`, `r`, `s`, `u`: tabulated lower deviations from
+  Table 5, with Table 5 sub-range lookup for `r`, `s`, and `u`;
 - hole `H`: `EI = 0`, and `JS`: split symmetrically around zero;
 - hole positions `C`–`G`: derived from the corresponding shaft upper deviation; and
 - hole positions `K`, `M`, `N`, `P`, `R`, `S`: derived from the corresponding shaft
   lower deviation.
 
-The repository fixture check compares stored expectations transcribed from Tables 1–3
-with the calculation engine and fails on any mismatch:
+The repository fixture check compares stored expectations transcribed from Tables 1, 4,
+and 5 with the calculation engine. It fails if an engine table row, cell, or sub-range
+is missing from the fixture, if a result differs, or if it performs no checks:
 
 ```bash
 deno run --allow-read scripts/check_iso286_fixtures.ts

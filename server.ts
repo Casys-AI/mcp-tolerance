@@ -3,7 +3,7 @@
 import { McpApp } from "@casys/mcp-server";
 import { ToleranceToolsClient } from "./src/client.ts";
 
-const VERSION = "0.3.1";
+const VERSION = "0.3.2";
 const DEFAULT_PORT = 3019;
 const DEFAULT_HOSTNAME = "127.0.0.1";
 

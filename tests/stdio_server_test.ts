@@ -87,7 +87,7 @@ Deno.test("native stdio accepts modern server/discover as its first request", as
     const meta = discovered._meta as Record<string, unknown>;
     assertEquals(meta["io.modelcontextprotocol/serverInfo"], {
       name: "mcp-tolerance",
-      version: "0.3.1",
+      version: "0.3.2",
     });
   } finally {
     await stop(server, writer);

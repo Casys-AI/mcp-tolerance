@@ -4,6 +4,18 @@ All notable changes to `@casys/mcp-tolerance` are documented here.
 
 ## Unreleased
 
+## 0.3.2 — 2026-08-28
+
+- Shaft position `c` now resolves the ISO 286-1:2010 Table 4 nominal-size sub-ranges
+  instead of reusing a containing Table 1 range value. Hole position `C` follows the
+  corrected inverse relation.
+- Shaft positions `r`, `s`, and `u` now resolve the ISO 286-1:2010 Table 5 nominal-size
+  sub-ranges instead of reusing a containing Table 1 range value.
+- Corrected the shaft fundamental-deviation provenance from Table 3 to Table 5.
+- The ISO 286 fixture cross-check is an explicit, fail-closed release gate: it rejects a
+  missing engine table row, cell, or sub-range and covers `C`/`c`, `R7`, and `S7`
+  boundary regressions.
+
 ## 0.3.1 — 2026-08-27
 
 - Stdio now uses the native era-aware MCP transport directly. Legacy `2025-06-18`
@@ -14,9 +26,9 @@ All notable changes to `@casys/mcp-tolerance` are documented here.
 - `tolerance_stackup` now returns a required `contributor_breakdown` array in
   `structuredContent`. Each item preserves input order and reports `name`,
   `signed_nominal_mm`, non-negative `worst_case_upper_excursion_mm` /
-  `worst_case_lower_excursion_mm`, and `rss_upper_sq_mm2` / `rss_lower_sq_mm2`.
-  These are the same terms used to form the existing aggregate bounds. Aggregate
-  fields and no-verdict semantics are unchanged.
+  `worst_case_lower_excursion_mm`, and `rss_upper_sq_mm2` / `rss_lower_sq_mm2`. These
+  are the same terms used to form the existing aggregate bounds. Aggregate fields and
+  no-verdict semantics are unchanged.
 
 ## 0.2.0
 
@@ -56,10 +68,10 @@ All notable changes to `@casys/mcp-tolerance` are documented here.
 - `tolerance_stackup` — worst-case arithmetic and RSS (Root Sum Square) dimension chain
   stackup. Inputs: array of contributors with nominal_mm, plus_um, minus_um, direction
   (±1). Outputs: nominal_mm, worst_case_min/max_mm, rss_min/max_mm. Worst-case bounds
-  every combination of the supplied intervals; RSS is statistical. Neither result is
-  an acceptance verdict without a caller-declared threshold.
+  every combination of the supplied intervals; RSS is statistical. Neither result is an
+  acceptance verdict without a caller-declared threshold.
 
-- Engine cross-validation against ISO 286-1:2010 Tables 1–3:
+- Engine cross-validation against ISO 286-1:2010 Tables 1, 4, and 5:
   - IT6 @ 0–3 mm = 6 µm (formula gives 5 — table is normative) ✓
   - IT6 @ 3–6 mm = 8 µm (formula gives 7 — table is normative) ✓
   - IT7 @ 25 mm = 21 µm ✓
@@ -72,9 +84,9 @@ All notable changes to `@casys/mcp-tolerance` are documented here.
   - n @ 80–120 mm: ei = 23 µm (formula gives 24 — table is normative) ✓
   - r @ 80–100 mm: ei = 51 µm ✓
 
-- Normative cross-check script `scripts/check_iso286_fixtures.ts` — verifies 203 values
-  from `tests/fixtures/iso286_table_values.json` (ISO 286-1:2010 Tables 1–3) against the
-  engine; exits 1 on any divergence.
+- Normative cross-check script `scripts/check_iso286_fixtures.ts` — compares the
+  committed Table 1, 4, and 5 fixtures with the engine and exits 1 on a divergence or
+  incomplete fixture.
 
 - Stateless HTTP MCP server on port 3019, protocol `2026-07-28`, transport matching the
   Casys engineering toolchain (`mcp-server@0.24.1`).
@@ -89,10 +101,10 @@ All notable changes to `@casys/mcp-tolerance` are documented here.
 - IT grades 1–4: ISO 286-1:2010 Table 1 (tabulated).
 - IT grades 5–12: ISO 286-1:2010 Table 1 (tabulated; normative authority over formula).
 - IT grades 13–18: ISO 286-1:2010 §B.2 formula with tiered rounding per §B.2.
-- Shaft clearance letters (c, d, e, f, g): ISO 286-1:2010 Table 2 (tabulated es).
+- Shaft clearance letters (c, d, e, f, g): ISO 286-1:2010 Table 4 (tabulated es).
 - Shaft reference letter h: es = 0 by ISO definition.
 - Shaft letter js: symmetric ±IT/2.
-- Shaft transition/interference letters (k, m, n, p, r, s, u): ISO 286-1:2010 Table 3
+- Shaft transition/interference letters (k, m, n, p, r, s, u): ISO 286-1:2010 Table 5
   (tabulated ei).
 - Hole letters derived by the ISO rule: EI_hole = −es_shaft (clearance C–G); ES_hole =
   −ei_shaft (interference/transition K–S).

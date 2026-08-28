@@ -41,7 +41,68 @@ const META = {
   },
 };
 
+async function runFixtureCheck(fixture: unknown): Promise<{
+  success: boolean;
+  output: string;
+}> {
+  const tempDir = await Deno.makeTempDir({ prefix: "mcp-tolerance-fixture-" });
+  const fixturePath = `${tempDir}/fixture.json`;
+  try {
+    await Deno.writeTextFile(fixturePath, JSON.stringify(fixture));
+    const result = await new Deno.Command(Deno.execPath(), {
+      args: [
+        "run",
+        "--allow-read",
+        new URL("../scripts/check_iso286_fixtures.ts", import.meta.url).pathname,
+        fixturePath,
+      ],
+    }).output();
+    return {
+      success: result.success,
+      output: new TextDecoder().decode(result.stdout) +
+        new TextDecoder().decode(result.stderr),
+    };
+  } finally {
+    await Deno.remove(tempDir, { recursive: true });
+  }
+}
+
 // ── ISO 286-1 engine unit tests ────────────────────────────────────────────
+
+Deno.test("ISO fixture checker rejects missing sub-ranges and zero checks", async () => {
+  const raw = await Deno.readTextFile(
+    new URL("./fixtures/iso286_table_values.json", import.meta.url).pathname,
+  );
+  const partial = JSON.parse(raw) as {
+    shaft_table4_subrange_es_um: { c: unknown[] };
+  };
+  partial.shaft_table4_subrange_es_um.c.pop();
+
+  const missingSubrange = await runFixtureCheck(partial);
+  assertEquals(missingSubrange.success, false);
+  assert(
+    missingSubrange.output.includes("shaft_table4_subrange_es_um.c: requires 23 rows"),
+    missingSubrange.output,
+  );
+
+  const zeroCheckFixture = {
+    it_grades: [],
+    shaft_clearance_deviations: {},
+    shaft_interference_deviations: {},
+    shaft_table4_es_um: {},
+    shaft_table4_subrange_es_um: {},
+    shaft_table5_ei_um: {},
+    shaft_table5_subrange_ei_um: {},
+    fit_results: [],
+    hole_deviations: [],
+  };
+  const zeroChecks = await runFixtureCheck(zeroCheckFixture);
+  assertEquals(zeroChecks.success, false);
+  assert(
+    zeroChecks.output.includes("fixture checker: performed zero checks"),
+    zeroChecks.output,
+  );
+});
 
 Deno.test("findRangeIndex places 25 mm in the 18–30 range (index 4)", () => {
   assertEquals(findRangeIndex(25), 4);
@@ -133,13 +194,13 @@ Deno.test("IT7 at 450 mm equals 63 µm (ISO 286-1:2010 Table 1)", () => {
 
 // ── Shaft clearance deviations — small-diameter table values ─────────────
 
-Deno.test("shaft g6 at 2 mm (0–3 range) has es = -2 µm per ISO Table 2", () => {
+Deno.test("shaft g6 at 2 mm (0–3 range) has es = -2 µm per ISO Table 4", () => {
   // formula would give -round(2.5*1.732^0.34)=-round(3.01)=-3 µm
   const dev = shaftDeviations("g", 6, 2);
   assertEquals(dev.es_um, -2);
 });
 
-Deno.test("shaft f7 at 2 mm (0–3 range) has es = -6 µm per ISO Table 2", () => {
+Deno.test("shaft f7 at 2 mm (0–3 range) has es = -6 µm per ISO Table 4", () => {
   // formula gives -7 µm
   const dev = shaftDeviations("f", 7, 2);
   assertEquals(dev.es_um, -6);
@@ -162,21 +223,65 @@ Deno.test("shaft e8 at 25 mm has es = -40 µm", () => {
   assertEquals(dev.es_um, -40);
 });
 
-Deno.test("shaft d11 at 25 mm has es = -65 µm (ISO 286-1:2010 Table 2)", () => {
+Deno.test("shaft d11 at 25 mm has es = -65 µm (ISO 286-1:2010 Table 4)", () => {
   const dev = shaftDeviations("d", 11, 25);
   assertEquals(dev.es_um, -65);
   assertEquals(dev.ei_um, -65 - 130); // -195
 });
 
-Deno.test("shaft c11 at 25 mm has es = -110 µm (ISO 286-1:2010 Table 2)", () => {
+Deno.test("shaft c11 at 25 mm has es = -110 µm (ISO 286-1:2010 Table 4)", () => {
   const dev = shaftDeviations("c", 11, 25);
   assertEquals(dev.es_um, -110);
   assertEquals(dev.ei_um, -110 - 130); // -240
 });
 
-Deno.test("shaft c11 at 5 mm (3–6 range) has es = -70 µm (ISO 286-1:2010 Table 2)", () => {
+Deno.test("shaft c11 at 5 mm (3–6 range) has es = -70 µm (ISO 286-1:2010 Table 4)", () => {
   const dev = shaftDeviations("c", 11, 5);
   assertEquals(dev.es_um, -70);
+});
+
+Deno.test("shaft c and hole C honour the Table 4 finer upper-inclusive sub-ranges", () => {
+  assertEquals(
+    [
+      [30, shaftDeviations("c", 6, 30).es_um],
+      [30.001, shaftDeviations("c", 6, 30.001).es_um],
+      [40, shaftDeviations("c", 6, 40).es_um],
+      [40.001, shaftDeviations("c", 6, 40.001).es_um],
+      [50, shaftDeviations("c", 6, 50).es_um],
+      [50.001, shaftDeviations("c", 6, 50.001).es_um],
+      [65, shaftDeviations("c", 6, 65).es_um],
+      [65.001, shaftDeviations("c", 6, 65.001).es_um],
+      [80, shaftDeviations("c", 6, 80).es_um],
+      [80.001, shaftDeviations("c", 6, 80.001).es_um],
+      [100, shaftDeviations("c", 6, 100).es_um],
+      [100.001, shaftDeviations("c", 6, 100.001).es_um],
+      [400, shaftDeviations("c", 6, 400).es_um],
+      [400.001, shaftDeviations("c", 6, 400.001).es_um],
+      [450, shaftDeviations("c", 6, 450).es_um],
+      [450.001, shaftDeviations("c", 6, 450.001).es_um],
+    ],
+    [
+      [30, -110],
+      [30.001, -120],
+      [40, -120],
+      [40.001, -130],
+      [50, -130],
+      [50.001, -140],
+      [65, -140],
+      [65.001, -150],
+      [80, -150],
+      [80.001, -170],
+      [100, -170],
+      [100.001, -180],
+      [400, -400],
+      [400.001, -440],
+      [450, -440],
+      [450.001, -480],
+    ],
+  );
+
+  assertEquals(holeDeviations("C", 7, 40), { EI_um: 120, ES_um: 145 });
+  assertEquals(holeDeviations("C", 7, 40.001), { EI_um: 130, ES_um: 155 });
 });
 
 Deno.test("shaft h6 at 25 mm has es = 0 and ei = -13 µm", () => {
@@ -201,38 +306,46 @@ Deno.test("shaft k6 at 2 mm has ei = +2 µm (D ≤ 3, table value)", () => {
   assertEquals(dev.ei_um, 2);
 });
 
-Deno.test("shaft p6 at 25 mm has ei = +22 µm and es = +35 µm (ISO 286-1:2010 Table 3)", () => {
+Deno.test("shaft p6 at 25 mm has ei = +22 µm and es = +35 µm (ISO 286-1:2010 Table 5)", () => {
   const dev = shaftDeviations("p", 6, 25);
   assertEquals(dev.ei_um, 22);
   assertEquals(dev.es_um, 35);
 });
 
-Deno.test("shaft n6 at 25 mm has ei = +15 µm (ISO 286-1:2010 Table 3)", () => {
+Deno.test("shaft n6 at 25 mm has ei = +15 µm (ISO 286-1:2010 Table 5)", () => {
   // formula gives round(5*23.238^0.34)=round(14.57)=15 — matches table
   const dev = shaftDeviations("n", 6, 25);
   assertEquals(dev.ei_um, 15);
 });
 
-Deno.test("shaft n6 at 100 mm has ei = +23 µm (ISO 286-1:2010 Table 3; formula gives 24)", () => {
+Deno.test("shaft n6 at 100 mm has ei = +23 µm (ISO 286-1:2010 Table 5; formula gives 24)", () => {
   // Verifies tabulated value prevails over formula divergence at 80–120 mm
   const dev = shaftDeviations("n", 6, 100);
   assertEquals(dev.ei_um, 23);
 });
 
-Deno.test("shaft r6 at 25 mm has ei = +28 µm (ISO 286-1:2010 Table 3)", () => {
+Deno.test("shaft r6 at 25 mm has ei = +28 µm (ISO 286-1:2010 Table 5)", () => {
   const dev = shaftDeviations("r", 6, 25);
   assertEquals(dev.ei_um, 28);
   assertEquals(dev.es_um, 28 + 13); // 41
 });
 
-Deno.test("shaft r6 at 2 mm has ei = +10 µm (ISO 286-1:2010 Table 3)", () => {
+Deno.test("shaft r6 at 2 mm has ei = +10 µm (ISO 286-1:2010 Table 5)", () => {
   const dev = shaftDeviations("r", 6, 2);
   assertEquals(dev.ei_um, 10);
 });
 
-Deno.test("shaft r6 at 100 mm has ei = +51 µm (ISO 286-1:2010 Table 3, 80–100 sub-range)", () => {
+Deno.test("shaft r6 at 100 mm has ei = +51 µm (ISO 286-1:2010 Table 5, 80–100 sub-range)", () => {
   const dev = shaftDeviations("r", 6, 100);
   assertEquals(dev.ei_um, 51);
+});
+
+Deno.test("shaft r/s/u resolve ISO Table 5 sub-ranges, not only Table 1 IT ranges", () => {
+  assertEquals(shaftDeviations("r", 6, 80).ei_um, 43);
+  assertEquals(shaftDeviations("s", 6, 80).ei_um, 59);
+  assertEquals(shaftDeviations("u", 6, 24).ei_um, 41);
+  assertEquals(shaftDeviations("u", 6, 24.001).ei_um, 48);
+  assertEquals(shaftDeviations("u", 6, 500).ei_um, 540);
 });
 
 // ── Hole deviations ────────────────────────────────────────────────────────
@@ -291,6 +404,16 @@ Deno.test("hole S7 at 25 mm has ES = -35, EI = -56 µm", () => {
   const dev = holeDeviations("S", 7, 25);
   assertEquals(dev.ES_um, -35);
   assertEquals(dev.EI_um, -56);
+});
+
+Deno.test("hole R7/S7 at 80 mm use the Table 5 65–80 mm sub-range", () => {
+  const r = holeDeviations("R", 7, 80);
+  assertEquals(r.ES_um, -43);
+  assertEquals(r.EI_um, -73);
+
+  const s = holeDeviations("S", 7, 80);
+  assertEquals(s.ES_um, -59);
+  assertEquals(s.EI_um, -89);
 });
 
 // ── Full fit computation ────────────────────────────────────────────────────
@@ -890,7 +1013,7 @@ Deno.test(
       const discoverResult = discovered.body.result as Record<string, unknown>;
       assertEquals(discoverResult.serverInfo, {
         name: "mcp-tolerance",
-        version: "0.3.1",
+        version: "0.3.2",
       });
 
       const listed = await rpc(url, "tools/list");

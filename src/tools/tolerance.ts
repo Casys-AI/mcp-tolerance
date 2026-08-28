@@ -29,7 +29,6 @@ const NOT_CHECKED_FIT = [
   `Supported shaft letters: ${
     SUPPORTED_SHAFT_LETTERS.join(", ")
   }. Other shaft letters are not implemented.`,
-  "The engine uses the 13 main ISO 286-1 diameter ranges. Letters where the standard defines sub-ranges within a main range (notably r, s, u for sizes 50–80 mm) may deviate by 1–6 µm from the sub-range tabulated value.",
   "Nominal diameters above 500 mm or at or below 0 mm are outside ISO 286-1 and will be rejected.",
 ];
 
