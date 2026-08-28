@@ -18,6 +18,9 @@ jobs:
       - name: Verify release gates
         run: deno task release:check
 
+      - name: Validate JSR publication
+        run: deno publish --dry-run
+
   publish-jsr:
     needs: check
     runs-on: ubuntu-latest
@@ -47,3 +50,20 @@ jobs:
       - name: Publish to JSR
         if: steps.version.outputs.published != 'true'
         run: deno publish
+
+  smoke-jsr:
+    needs: publish-jsr
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+
+      - name: Smoke the published JSR stdio entry point
+        run: |
+          NAME=$(deno eval 'console.log(JSON.parse(Deno.readTextFileSync("deno.json")).name)')
+          VERSION=$(deno eval 'console.log(JSON.parse(Deno.readTextFileSync("deno.json")).version)')
+          deno run --allow-run scripts/smoke_stdio.ts --expect-version "$VERSION" -- \
+            deno run --minimum-dependency-age 0 --allow-all "jsr:${NAME}@${VERSION}/server" --stdio
