@@ -72,17 +72,17 @@ limits:
 }
 ```
 
-### Published 0.3.1 Docker image
+### Published 0.3.2 Docker image
 
-The published multi-architecture 0.3.1 release-code image is available for `linux/amd64`
-and `linux/arm64`; its revision matches the 0.3.1 release commit. Its entrypoint is
+The published multi-architecture 0.3.2 release image is available for `linux/amd64`
+and `linux/arm64`. Its entrypoint is
 `./docker-entrypoint.sh` and its `CMD` is `http`, so this command starts the stateless
 HTTP transport:
 
 ```bash
 docker run --rm \
   -p 127.0.0.1:3019:3019 \
-  ghcr.io/casys-ai/mcp-tolerance@sha256:2a0f4931d23894d7777871beefc7130d30a9b3efa0e253a3f402bdb534ca0ec3 \
+  ghcr.io/casys-ai/mcp-tolerance@sha256:c7c67ba5907aa20bef5666dbdad21d4c1d652db4b9a0653d989d03e0d4ecdc95 \
   http
 ```
 
@@ -122,7 +122,7 @@ overrides the image's `CMD http`; it does not start an HTTP child:
         "run",
         "--rm",
         "-i",
-        "ghcr.io/casys-ai/mcp-tolerance@sha256:2a0f4931d23894d7777871beefc7130d30a9b3efa0e253a3f402bdb534ca0ec3",
+        "ghcr.io/casys-ai/mcp-tolerance@sha256:c7c67ba5907aa20bef5666dbdad21d4c1d652db4b9a0653d989d03e0d4ecdc95",
         "stdio"
       ]
     }
