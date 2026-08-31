@@ -54,9 +54,9 @@
     "lineWidth": 88,
     "semiColons": true,
     "singleQuote": false,
-    "exclude": ["src/ui/dist"]
+    "exclude": ["src/ui/dist", ".deps"]
   },
   "lint": {
-    "exclude": ["src/ui/dist"]
+    "exclude": ["src/ui/dist", ".deps"]
   }
 }
