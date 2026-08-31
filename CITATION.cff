@@ -1,8 +1,8 @@
 cff-version: 1.2.0
 message: "If you use this software, please cite it as below."
 title: "mcp-tolerance: MCP oracle for ISO 286-1 fits and 1D tolerance stack-ups — clearance/transition/interference, worst-case and RSS"
-version: 0.3.2
-date-released: 2026-08-28
+version: 0.3.4
+date-released: 2026-08-31
 authors:
   - family-names: Pesle
     given-names: Erwan Lee

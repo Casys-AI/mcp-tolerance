@@ -45,7 +45,7 @@ export interface ToleranceViewAppManifest {
   readonly app: Readonly<{
     id: "io.casys.mcp-tolerance";
     title: "Tolerance Views";
-    version: "0.3.3";
+    version: "0.3.4";
   }>;
   readonly resources: readonly Readonly<ToleranceViewAppResource>[];
 }
@@ -84,7 +84,7 @@ export const TOLERANCE_VIEW_APP_MANIFEST: Readonly<ToleranceViewAppManifest> = O
     app: Object.freeze({
       id: "io.casys.mcp-tolerance",
       title: "Tolerance Views",
-      version: "0.3.3",
+      version: "0.3.4",
     }),
     resources: Object.freeze(
       resources.map((resource) => Object.freeze(resource)),

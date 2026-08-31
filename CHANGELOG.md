@@ -2,7 +2,7 @@
 
 All notable changes to `@casys/mcp-tolerance` are documented here.
 
-## Unreleased
+## 0.3.4 — 2026-08-31
 
 - MCP Apps for `tolerance_limits`/`tolerance_it`, `tolerance_fit`/
   `tolerance_fit_analyze`, and `tolerance_stackup` now expose exactly one semantic
@@ -17,6 +17,12 @@ All notable changes to `@casys/mcp-tolerance` are documented here.
   `0629f67179868c9f17a3fb6705da32fdfcbcc216` (View 0.9.1, contracts 0.1.0, components
   0.2.0). Tool names, schemas, text `content`, and `structuredContent` remain unchanged
   aside from `_meta.ui.resourceUri`; the server still starts when UI dist is absent.
+- The concise README now shows an optimized capture of the real fit viewer using the
+  exact `H7/g6 @ 25 mm` fixture result. The image is explicitly labelled as fixture
+  data, while contracts, calculation assumptions, deployment, and contributor details
+  live under `docs/`.
+- The release image now pins its multi-architecture Deno base by digest and publishes
+  explicit provenance and SBOM attestations alongside the OCI index.
 
 ## 0.3.2 — 2026-08-28
 

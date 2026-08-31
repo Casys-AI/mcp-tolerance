@@ -122,9 +122,9 @@ Deno.test("viewer registration serves each built HTML resource", async () => {
 });
 
 Deno.test("JSR HTTPS module URLs resolve viewers without a local filesystem path", async () => {
-  const moduleUrl = "https://jsr.io/@casys/mcp-tolerance/0.3.3/server.ts";
+  const moduleUrl = "https://jsr.io/@casys/mcp-tolerance/0.3.4/server.ts";
   const viewerUrl =
-    "https://jsr.io/@casys/mcp-tolerance/0.3.3/src/ui/dist/limits-viewer/index.html";
+    "https://jsr.io/@casys/mcp-tolerance/0.3.4/src/ui/dist/limits-viewer/index.html";
   const html = "<!doctype html><title>Remote limits</title>";
   const { viewerRegistration, app } = createToleranceServer({
     logger: () => {},

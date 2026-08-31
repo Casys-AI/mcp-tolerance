@@ -1,7 +1,7 @@
 # MCP Tolerance Server — stateless HTTP, port 3019
 # Engine: TypeScript-only ISO 286-1 formulas, no external binaries.
-# Base: denoland/deno:debian (multi-arch, amd64 + arm64)
-FROM denoland/deno:debian
+# Base: denoland/deno:debian (multi-arch, amd64 + arm64), pinned for this release.
+FROM denoland/deno:debian@sha256:2014dc167ece617ef7e7ba40631ac2234c59e75ce693e7cc2dc2602b3c87859d
 
 WORKDIR /app
 
