@@ -28,6 +28,16 @@ export type {
 } from "./src/client.ts";
 
 export { fitTools } from "./src/tools/mod.ts";
+export {
+  FIT_VIEWER_NAME,
+  FIT_VIEWER_URI,
+  LIMITS_VIEWER_NAME,
+  LIMITS_VIEWER_URI,
+  STACKUP_VIEWER_NAME,
+  STACKUP_VIEWER_URI,
+  TOLERANCE_VIEWER_NAMES,
+  TOOL_VIEWER_URIS,
+} from "./src/ui/viewers.ts";
 
 export {
   computeFit,

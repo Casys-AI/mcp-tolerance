@@ -4,6 +4,12 @@ All notable changes to `@casys/mcp-tolerance` are documented here.
 
 ## Unreleased
 
+- Optional MCP Apps for `tolerance_limits`/`tolerance_it`, `tolerance_fit`/
+  `tolerance_fit_analyze`, and `tolerance_stackup`. Each resource is a bounded
+  result card with a small component catalogue. Tool names, schemas, text
+  `content`, and `structuredContent` are unchanged aside from
+  `_meta.ui.resourceUri`. The server still starts when UI dist is absent.
+
 ## 0.3.2 — 2026-08-28
 
 - Shaft position `c` now resolves the ISO 286-1:2010 Table 4 nominal-size sub-ranges

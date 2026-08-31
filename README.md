@@ -10,7 +10,11 @@ Give the server `H7/g6` at a nominal diameter of 25 mm and it returns:
 - resulting clearance: 0.007 to 0.041 mm, classified as a clearance fit.
 
 The server performs calculations. It does not inspect a manufactured part, choose a fit
-for an application, or declare a design conformant.
+for an application, or declare a design conformant. Hosts that support MCP Apps can
+render each visual tool result in a small, provider-owned viewer
+(`ui://mcp-tolerance/limits-viewer`, `ui://mcp-tolerance/fit-viewer`,
+`ui://mcp-tolerance/stackup-viewer`). Text clients keep the same `content` and
+`structuredContent` contracts. The server starts even when the UI dist is absent.
 
 ## Quick start
 

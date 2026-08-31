@@ -7,6 +7,7 @@
  * @module lib/tolerance/tools/tolerance
  */
 
+import { FIT_VIEWER_URI, LIMITS_VIEWER_URI } from "../ui/viewers.ts";
 import type { ToleranceTool } from "./types.ts";
 import {
   computeFit,
@@ -157,6 +158,7 @@ const toleranceFitTool: ToleranceTool = {
     idempotentHint: true,
     openWorldHint: false,
   },
+  _meta: { ui: { resourceUri: FIT_VIEWER_URI } },
   handler(args) {
     const holeCode = String(args["hole_code"] ?? "");
     const shaftCode = String(args["shaft_code"] ?? "");
@@ -287,6 +289,7 @@ const toleranceItTool: ToleranceTool = {
     idempotentHint: true,
     openWorldHint: false,
   },
+  _meta: { ui: { resourceUri: LIMITS_VIEWER_URI } },
   handler(args) {
     const rawGrade = args["grade"];
     const rawDiam = args["nominal_diameter_mm"];

@@ -1,0 +1,13 @@
+body {
+  min-width: 0;
+  margin: 0;
+  background: transparent;
+}
+
+.tolerance-component-surface {
+  padding: 0.65rem;
+}
+
+.tolerance-component-surface .mcp-view-element-provenance {
+  margin-top: 0.25rem;
+}

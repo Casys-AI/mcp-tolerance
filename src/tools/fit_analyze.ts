@@ -7,6 +7,7 @@
  * @module lib/tolerance/tools/fit_analyze
  */
 
+import { FIT_VIEWER_URI } from "../ui/viewers.ts";
 import type { ToleranceTool } from "./types.ts";
 import {
   computeFit,
@@ -146,6 +147,7 @@ export const toleranceFitAnalyzeTool: ToleranceTool = {
     idempotentHint: true,
     openWorldHint: false,
   },
+  _meta: { ui: { resourceUri: FIT_VIEWER_URI } },
   handler(args) {
     const holeClass = String(args["hole_class"] ?? "");
     const shaftClass = String(args["shaft_class"] ?? "");

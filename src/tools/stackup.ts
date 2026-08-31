@@ -15,6 +15,7 @@
  * @module lib/tolerance/tools/stackup
  */
 
+import { STACKUP_VIEWER_URI } from "../ui/viewers.ts";
 import type { ToleranceTool } from "./types.ts";
 
 const TOOL_NAME = "tolerance_stackup";
@@ -95,7 +96,10 @@ const CONTRIBUTOR_SCHEMA = {
   additionalProperties: false,
   required: ["name", "nominal_mm", "plus_um", "minus_um", "direction"],
   properties: {
-    name: { type: "string", description: "Human-readable label for this dimension." },
+    name: {
+      type: "string",
+      description: "Human-readable label for this dimension.",
+    },
     nominal_mm: {
       type: "number",
       description:
@@ -267,6 +271,7 @@ export const toleranceStackupTool: ToleranceTool = {
     idempotentHint: true,
     openWorldHint: false,
   },
+  _meta: { ui: { resourceUri: STACKUP_VIEWER_URI } },
   handler(args) {
     const contributors = validateContributors(args["contributors"]);
 

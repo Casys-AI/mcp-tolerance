@@ -4,6 +4,7 @@
  * @module lib/tolerance/tools/limits
  */
 
+import { LIMITS_VIEWER_URI } from "../ui/viewers.ts";
 import type { ToleranceTool } from "./types.ts";
 import {
   DIAMETER_RANGES,
@@ -69,7 +70,10 @@ const OUTPUT_SCHEMA: Record<string, unknown> = {
       maxItems: 2,
     },
     it_grade: { type: "integer" },
-    IT_um: { type: "number", description: "Fundamental tolerance width in µm." },
+    IT_um: {
+      type: "number",
+      description: "Fundamental tolerance width in µm.",
+    },
     fundamental_deviation_um: {
       type: "number",
       description: "The deviation closest to the nominal line (zero line) in µm. " +
@@ -133,6 +137,7 @@ export const toleranceLimitsTool: ToleranceTool = {
     idempotentHint: true,
     openWorldHint: false,
   },
+  _meta: { ui: { resourceUri: LIMITS_VIEWER_URI } },
   handler(args) {
     const cls = String(args["tolerance_class"] ?? "");
     const rawDiam = args["nominal_diameter_mm"];
