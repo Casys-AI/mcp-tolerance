@@ -4,10 +4,19 @@ import type { ResultData } from "@casys/mcp-view";
 import type { PreactSurfaceContext } from "@casys/mcp-view-components/preact";
 import { StateMessage } from "@casys/mcp-view-components/preact/components";
 import { createElement, render } from "preact";
+import {
+  TOLERANCE_VIEW_APP_MANIFEST,
+  type ToleranceViewKey,
+} from "../../app-manifest.ts";
+import {
+  isToleranceRecordedViewSession,
+  parseToleranceRecordedViewSession,
+  type ToleranceRecordedViewSession,
+} from "./recorded-session.ts";
 
 export interface StartToleranceViewerOptions<TData> {
   readonly root: HTMLElement;
-  readonly info: { readonly name: string; readonly version: string };
+  readonly view: ToleranceViewKey;
   readonly registry: ViewComponentRegistry<TData, PreactSurfaceContext<TData>>;
   readonly validate: (value: unknown) => value is TData;
   readonly loadingLabel: string;
@@ -17,14 +26,33 @@ export interface StartToleranceViewerOptions<TData> {
 export async function startToleranceViewer<TData>(
   options: StartToleranceViewerOptions<TData>,
 ): Promise<void> {
-  await startPreactSurfaceApp({
+  await startPreactSurfaceApp<
+    ResultData,
+    ToleranceRecordedViewSession<TData>
+  >({
     root: options.root,
-    info: options.info,
+    info: {
+      name: TOLERANCE_VIEW_APP_MANIFEST.app.id,
+      version: TOLERANCE_VIEW_APP_MANIFEST.app.version,
+    },
     registry: options.registry as ViewComponentRegistry<
       ResultData,
       PreactSurfaceContext<ResultData>
     >,
     validate: options.validate as (value: unknown) => value is ResultData,
+    validateSession: (value): value is ToleranceRecordedViewSession<TData> =>
+      isToleranceRecordedViewSession(options.view, value, options.validate),
+    mapSessionToData: async (session) => {
+      const parsed = await parseToleranceRecordedViewSession(
+        options.view,
+        session,
+        options.validate,
+      );
+      if (!parsed) {
+        throw new TypeError(`Recorded ${options.view} projection rejected.`);
+      }
+      return parsed.structuredContent as ResultData;
+    },
     loadingLabel: options.loadingLabel,
     emptyLabel: options.emptyLabel,
     surfaceClassName: "tolerance-component-surface",

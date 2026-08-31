@@ -14,7 +14,11 @@ for an application, or declare a design conformant. Hosts that support MCP Apps 
 render each visual tool result in a small, provider-owned viewer
 (`ui://mcp-tolerance/limits-viewer`, `ui://mcp-tolerance/fit-viewer`,
 `ui://mcp-tolerance/stackup-viewer`). Text clients keep the same `content` and
-`structuredContent` contracts. The server starts even when the UI dist is absent.
+`structuredContent` contracts. The server starts even when the UI dist is absent. The
+source package also exports `./view-app-manifest`: a provider-owned declaration of the
+three whole-view resources and their read-only `viewer.session.apply` contracts. A
+recording host supplies the projection; the provider does not create a Digital Thread
+session or anchor.
 
 ## Quick start
 
@@ -78,10 +82,9 @@ limits:
 
 ### Published 0.3.2 Docker image
 
-The published multi-architecture 0.3.2 release image is available for `linux/amd64`
-and `linux/arm64`. Its entrypoint is
-`./docker-entrypoint.sh` and its `CMD` is `http`, so this command starts the stateless
-HTTP transport:
+The published multi-architecture 0.3.2 release image is available for `linux/amd64` and
+`linux/arm64`. Its entrypoint is `./docker-entrypoint.sh` and its `CMD` is `http`, so
+this command starts the stateless HTTP transport:
 
 ```bash
 docker run --rm \

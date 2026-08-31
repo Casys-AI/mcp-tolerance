@@ -13,7 +13,7 @@ await withAuditedViewerDenoConfig(async (configPath) => {
       "--frozen",
       "--allow-all",
       join(here, "src", "format_test.ts"),
-      join(here, "src", "catalog_test.ts"),
+      join(here, "src", "view-contract_test.ts"),
       join(here, "src", "components_test.ts"),
     ],
     stdin: "inherit",

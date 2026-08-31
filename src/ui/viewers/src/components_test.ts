@@ -4,12 +4,21 @@ import {
   mountComponentSurface,
 } from "@casys/mcp-view-components";
 import type { PreactSurfaceContext } from "@casys/mcp-view-components/preact";
-import { FIT_COMPONENTS, FIT_DEFAULT_SURFACE } from "./fit-catalog.ts";
-import { LIMITS_COMPONENTS, LIMITS_DEFAULT_SURFACE } from "./limits-catalog.ts";
-import { STACKUP_COMPONENTS, STACKUP_DEFAULT_SURFACE } from "./stackup-catalog.ts";
-import { FIT_COMPONENT_REGISTRY } from "./fit-components.tsx";
-import { LIMITS_COMPONENT_REGISTRY } from "./limits-components.tsx";
-import { STACKUP_COMPONENT_REGISTRY } from "./stackup-components.tsx";
+import {
+  FIT_COMPONENT,
+  FIT_COMPONENT_REGISTRY,
+  FIT_DEFAULT_SURFACE,
+} from "./fit-components.tsx";
+import {
+  LIMITS_COMPONENT,
+  LIMITS_COMPONENT_REGISTRY,
+  LIMITS_DEFAULT_SURFACE,
+} from "./limits-components.tsx";
+import {
+  STACKUP_COMPONENT,
+  STACKUP_COMPONENT_REGISTRY,
+  STACKUP_DEFAULT_SURFACE,
+} from "./stackup-components.tsx";
 import {
   FIT_ANALYZE_H7_G6,
   FIT_H7_P6,
@@ -32,156 +41,146 @@ const limitsContext = {} as unknown as PreactSurfaceContext<LimitsViewerData>;
 const fitContext = {} as unknown as PreactSurfaceContext<FitViewerData>;
 const stackupContext = {} as unknown as PreactSurfaceContext<StackupResult>;
 
-Deno.test("each registry advertises a small catalog and one-card default surface", () => {
-  const limits = advertisedComponentCatalog(LIMITS_COMPONENT_REGISTRY);
-  assertEquals(Object.keys(limits.components).toSorted(), [
-    LIMITS_COMPONENTS.notChecked,
-    LIMITS_COMPONENTS.result,
-  ]);
-  assertEquals(limits.defaultSurface?.components, [
-    ...LIMITS_DEFAULT_SURFACE.components,
-  ]);
-
-  const fit = advertisedComponentCatalog(FIT_COMPONENT_REGISTRY);
-  assertEquals(Object.keys(fit.components).toSorted(), [
-    FIT_COMPONENTS.members,
-    FIT_COMPONENTS.notChecked,
-    FIT_COMPONENTS.result,
-  ]);
-  assertEquals(fit.defaultSurface?.components, [
-    ...FIT_DEFAULT_SURFACE.components,
-  ]);
-
-  const stackup = advertisedComponentCatalog(STACKUP_COMPONENT_REGISTRY);
-  assertEquals(Object.keys(stackup.components).toSorted(), [
-    STACKUP_COMPONENTS.contributors,
-    STACKUP_COMPONENTS.notChecked,
-    STACKUP_COMPONENTS.result,
-  ]);
-  assertEquals(
-    stackup.defaultSurface?.components,
-    [...STACKUP_DEFAULT_SURFACE.components],
-  );
+Deno.test("each viewer advertises exactly one business-object component", () => {
+  const cases = [
+    [
+      advertisedComponentCatalog(LIMITS_COMPONENT_REGISTRY),
+      LIMITS_COMPONENT,
+      LIMITS_DEFAULT_SURFACE,
+    ],
+    [
+      advertisedComponentCatalog(FIT_COMPONENT_REGISTRY),
+      FIT_COMPONENT,
+      FIT_DEFAULT_SURFACE,
+    ],
+    [
+      advertisedComponentCatalog(STACKUP_COMPONENT_REGISTRY),
+      STACKUP_COMPONENT,
+      STACKUP_DEFAULT_SURFACE,
+    ],
+  ] as const;
+  for (const [advertised, component, surface] of cases) {
+    assertEquals(Object.keys(advertised.components), [component]);
+    assertEquals(advertised.defaultSurface?.components, [
+      ...surface.components,
+    ]);
+  }
 });
 
-Deno.test("compact source does not import LimitGauge, SemanticElement, or verdicts", async () => {
-  const files = [
-    "./result-card.tsx",
-    "./limits-components.tsx",
-    "./fit-components.tsx",
-    "./stackup-components.tsx",
-  ];
-  for (const relative of files) {
+Deno.test("provider components use semantic slots without path or verdict UI", async () => {
+  for (
+    const relative of [
+      "./limits-components.tsx",
+      "./fit-components.tsx",
+      "./stackup-components.tsx",
+    ]
+  ) {
     const source = await Deno.readTextFile(new URL(relative, import.meta.url));
-    assertEquals(source.includes("LimitGauge"), false, relative);
+    assertEquals(source.includes("SemanticElement"), true, relative);
+    assertEquals(source.includes("ElementIdent"), true, relative);
+    assertEquals(source.includes("ElementReading"), true, relative);
+    assertEquals(source.includes("ElementProvenance"), true, relative);
     assertEquals(source.includes("ElementVerdict"), false, relative);
-    assertEquals(source.includes("SemanticElement"), false, relative);
+    assertEquals(source.includes("PathBar"), false, relative);
+    assertEquals(source.includes("<Card"), false, relative);
   }
 });
 
 Deno.test({
-  name: "limits default surface is one Card for H7 and one Card for IT7",
+  name: "limits viewer keeps one object, required readings, scope, and provenance",
   permissions: { read: true, env: true },
   async fn() {
-    const hole = parseLimitsResult(LIMITS_H7);
-    await withMountedSurface(
-      LIMITS_COMPONENT_REGISTRY,
-      hole,
-      limitsContext,
-      (root) => {
-        assertEquals(root.querySelectorAll("[data-component]").length, 1);
-        assertEquals(
-          root.querySelector("[data-component]")?.getAttribute(
-            "data-component",
-          ),
-          LIMITS_COMPONENTS.result,
-        );
-        assertEquals(root.querySelector(".mcp-view-semantic-element"), null);
-        assertEquals(root.querySelector(".mcp-view-limit-gauge"), null);
-        assertEquals(root.querySelector("[data-element-slot=verdict]"), null);
-        assertEquals(root.querySelectorAll('[data-tone="success"]').length, 0);
-        assertStringIncludes(root.textContent ?? "", "H7");
-        assertStringIncludes(root.textContent ?? "", "ISO 286-1 hole");
-        assertStringIncludes(root.textContent ?? "", "µm");
-        assertStringIncludes(root.textContent ?? "", "+21");
-        assertNoInventedVerdict(root);
-      },
-    );
-
-    const it = parseItResult(IT7);
-    await withMountedSurface(
-      LIMITS_COMPONENT_REGISTRY,
-      it,
-      limitsContext,
-      (root) => {
-        assertEquals(root.querySelectorAll("[data-component]").length, 1);
-        assertStringIncludes(root.textContent ?? "", "IT7");
-        assertStringIncludes(root.textContent ?? "", "21");
-        assertEquals((root.textContent ?? "").includes("H7"), false);
-      },
-    );
+    for (const data of [parseLimitsResult(LIMITS_H7), parseItResult(IT7)]) {
+      await withMountedSurface(
+        LIMITS_COMPONENT_REGISTRY,
+        data,
+        limitsContext,
+        (root) => {
+          assertEquals(root.querySelectorAll("[data-component]").length, 1);
+          assertEquals(
+            root.querySelectorAll(".mcp-view-semantic-element").length,
+            1,
+          );
+          assertEquals(root.querySelector("[data-element-slot=verdict]"), null);
+          assertEquals(
+            root.querySelector("[data-element-slot=ident]") !== null,
+            true,
+          );
+          assertEquals(
+            root.querySelectorAll("[data-element-slot=reading]").length > 1,
+            true,
+          );
+          assertStringIncludes(root.textContent ?? "", "ISO 286-1");
+          assertStringIncludes(root.textContent ?? "", "Not checked");
+          assertStringIncludes(root.textContent ?? "", "formulas/tables");
+          assertNoInventedVerdict(root);
+        },
+      );
+    }
   },
 });
 
 Deno.test({
-  name: "fit default surface shows classification without a pass/fail verdict",
+  name: "fit viewer keeps classification and member readings inside one object",
   permissions: { read: true, env: true },
   async fn() {
-    const fit = parseFitResult(FIT_H7_P6);
-    await withMountedSurface(
-      FIT_COMPONENT_REGISTRY,
-      fit,
-      fitContext,
-      (root) => {
-        assertEquals(root.querySelectorAll("[data-component]").length, 1);
-        assertEquals(
-          root.querySelector("[data-component]")?.getAttribute(
-            "data-component",
-          ),
-          FIT_COMPONENTS.result,
-        );
-        assertStringIncludes(root.textContent ?? "", "H7/p6");
-        assertStringIncludes(root.textContent ?? "", "interference");
-        assertEquals(root.querySelector(".mcp-view-semantic-element"), null);
-        assertEquals(root.querySelectorAll('[data-tone="success"]').length, 0);
-        assertEquals(root.querySelectorAll('[data-tone="danger"]').length, 0);
-        assertNoInventedVerdict(root);
-      },
-    );
-
-    const analyze = parseFitAnalyzeResult(FIT_ANALYZE_H7_G6);
-    await withMountedSurface(
-      FIT_COMPONENT_REGISTRY,
-      analyze,
-      fitContext,
-      (root) => {
-        assertStringIncludes(root.textContent ?? "", "H7/g6");
-        assertStringIncludes(root.textContent ?? "", "clearance");
-        assertEquals(
-          (root.textContent ?? "").includes("Minimum interference"),
-          false,
-        );
-      },
-    );
+    for (
+      const data of [
+        parseFitResult(FIT_H7_P6),
+        parseFitAnalyzeResult(FIT_ANALYZE_H7_G6),
+      ]
+    ) {
+      await withMountedSurface(
+        FIT_COMPONENT_REGISTRY,
+        data,
+        fitContext,
+        (root) => {
+          assertEquals(root.querySelectorAll("[data-component]").length, 1);
+          assertEquals(
+            root.querySelectorAll(".mcp-view-semantic-element").length,
+            1,
+          );
+          assertStringIncludes(
+            root.textContent ?? "",
+            `${data.hole.designation}/${data.shaft.designation}`,
+          );
+          assertStringIncludes(root.textContent ?? "", "Fit type");
+          assertStringIncludes(
+            root.textContent ?? "",
+            `Hole ${data.hole.designation}`,
+          );
+          assertStringIncludes(
+            root.textContent ?? "",
+            `Shaft ${data.shaft.designation}`,
+          );
+          assertEquals(root.querySelector("[data-element-slot=verdict]"), null);
+          assertNoInventedVerdict(root);
+        },
+      );
+    }
   },
 });
 
 Deno.test({
-  name: "stackup default surface omits the contributor table",
+  name: "stack-up viewer keeps aggregate and contributor detail in one object",
   permissions: { read: true, env: true },
   async fn() {
-    const stackup = parseStackupResult(STACKUP_TWO);
     await withMountedSurface(
       STACKUP_COMPONENT_REGISTRY,
-      stackup,
+      parseStackupResult(STACKUP_TWO),
       stackupContext,
       (root) => {
         assertEquals(root.querySelectorAll("[data-component]").length, 1);
-        assertEquals(root.querySelector(".mcp-view-table"), null);
-        assertStringIncludes(root.textContent ?? "", "1D stack-up");
-        assertStringIncludes(root.textContent ?? "", "2 contributors");
-        assertStringIncludes(root.textContent ?? "", "mm");
-        assertEquals((root.textContent ?? "").includes("housing depth"), false);
+        assertEquals(
+          root.querySelectorAll(".mcp-view-semantic-element").length,
+          1,
+        );
+        assertEquals(root.querySelectorAll(".mcp-view-table").length, 1);
+        assertStringIncludes(root.textContent ?? "", "housing depth");
+        assertStringIncludes(root.textContent ?? "", "shaft length");
+        assertStringIncludes(root.textContent ?? "", "Worst-case min");
+        assertStringIncludes(root.textContent ?? "", "deterministic");
+        assertEquals(root.querySelector("[data-element-slot=verdict]"), null);
         assertNoInventedVerdict(root);
       },
     );

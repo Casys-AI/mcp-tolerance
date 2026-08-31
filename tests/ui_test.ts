@@ -2,6 +2,11 @@ import { assert, assertEquals, assertRejects } from "@std/assert";
 import { createToleranceServer, createToleranceViewerFileSystem } from "../server.ts";
 import { allTools } from "../src/tools/mod.ts";
 import {
+  TOLERANCE_RECORDED_SESSION_SCHEMAS,
+  TOLERANCE_VIEW_APP_MANIFEST,
+  TOLERANCE_VIEWER_SESSION_ACTION,
+} from "../src/ui/app-manifest.ts";
+import {
   FIT_VIEWER_URI,
   LIMITS_VIEWER_URI,
   STACKUP_VIEWER_URI,
@@ -117,9 +122,9 @@ Deno.test("viewer registration serves each built HTML resource", async () => {
 });
 
 Deno.test("JSR HTTPS module URLs resolve viewers without a local filesystem path", async () => {
-  const moduleUrl = "https://jsr.io/@casys/mcp-tolerance/0.3.2/server.ts";
+  const moduleUrl = "https://jsr.io/@casys/mcp-tolerance/0.3.3/server.ts";
   const viewerUrl =
-    "https://jsr.io/@casys/mcp-tolerance/0.3.2/src/ui/dist/limits-viewer/index.html";
+    "https://jsr.io/@casys/mcp-tolerance/0.3.3/src/ui/dist/limits-viewer/index.html";
   const html = "<!doctype html><title>Remote limits</title>";
   const { viewerRegistration, app } = createToleranceServer({
     logger: () => {},
@@ -183,19 +188,22 @@ Deno.test("tools/list keeps output schemas closed after UI metadata is attached"
   }
 });
 
-Deno.test("versioned viewer HTML is one inline module per resource", async () => {
-  const expected: Record<string, { present: string; absent: string[] }> = {
+Deno.test("versioned viewer HTML is one recorded mono-object App per resource", async () => {
+  const expected: Record<
+    string,
+    { present: string; sessionSchema: string }
+  > = {
     "limits-viewer": {
       present: "tolerance.limits-result",
-      absent: ["tolerance.fit-result", "tolerance.stackup-result"],
+      sessionSchema: TOLERANCE_RECORDED_SESSION_SCHEMAS.limits,
     },
     "fit-viewer": {
       present: "tolerance.fit-result",
-      absent: ["tolerance.limits-result", "tolerance.stackup-result"],
+      sessionSchema: TOLERANCE_RECORDED_SESSION_SCHEMAS.fit,
     },
     "stackup-viewer": {
       present: "tolerance.stackup-result",
-      absent: ["tolerance.limits-result", "tolerance.fit-result"],
+      sessionSchema: TOLERANCE_RECORDED_SESSION_SCHEMAS.stackup,
     },
   };
   for (const [viewer, keys] of Object.entries(expected)) {
@@ -210,9 +218,21 @@ Deno.test("versioned viewer HTML is one inline module per resource", async () =>
     assertEquals(source.includes("BUNDLE_PLACEHOLDER"), false);
     new Function(source);
     assert(html.includes("io.casys.mcp.view-components/v1"));
-    assert(html.includes("mcp-view-card"));
+    assert(html.includes("mcp-view-semantic-element"));
+    assert(html.includes(TOLERANCE_VIEW_APP_MANIFEST.app.id));
+    assert(html.includes(TOLERANCE_VIEW_APP_MANIFEST.app.version));
+    assert(html.includes(TOLERANCE_VIEWER_SESSION_ACTION));
+    assert(html.includes(keys.sessionSchema));
     assert(html.includes(keys.present));
-    for (const absent of keys.absent) {
+    for (
+      const absent of [
+        "tolerance.limits-not-checked",
+        "tolerance.fit-members",
+        "tolerance.fit-not-checked",
+        "tolerance.stackup-contributors",
+        "tolerance.stackup-not-checked",
+      ]
+    ) {
       assertEquals(
         html.includes(absent),
         false,

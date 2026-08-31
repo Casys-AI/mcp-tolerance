@@ -4,11 +4,19 @@ All notable changes to `@casys/mcp-tolerance` are documented here.
 
 ## Unreleased
 
-- Optional MCP Apps for `tolerance_limits`/`tolerance_it`, `tolerance_fit`/
-  `tolerance_fit_analyze`, and `tolerance_stackup`. Each resource is a bounded
-  result card with a small component catalogue. Tool names, schemas, text
-  `content`, and `structuredContent` are unchanged aside from
-  `_meta.ui.resourceUri`. The server still starts when UI dist is absent.
+- MCP Apps for `tolerance_limits`/`tolerance_it`, `tolerance_fit`/
+  `tolerance_fit_analyze`, and `tolerance_stackup` now expose exactly one semantic
+  business-object component per resource. Identity, required readings, scope notes, and
+  exact tool provenance stay together; no pass/fail verdict or artificial navigation is
+  introduced.
+- The package exports an exact provider-owned View App manifest. Every resource declares
+  its result schema(s), one read-only recorded-session schema, and the
+  `viewer.session.apply` receiver used by a recording host. The manifest and receiver
+  contain no provider endpoint, credentials, tool arguments, or Digital Thread anchor.
+- Viewer builds now pin the split MCP View sources at
+  `0629f67179868c9f17a3fb6705da32fdfcbcc216` (View 0.9.1, contracts 0.1.0, components
+  0.2.0). Tool names, schemas, text `content`, and `structuredContent` remain unchanged
+  aside from `_meta.ui.resourceUri`; the server still starts when UI dist is absent.
 
 ## 0.3.2 — 2026-08-28
 

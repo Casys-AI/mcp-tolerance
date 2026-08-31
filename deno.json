@@ -1,6 +1,6 @@
 {
   "name": "@casys/mcp-tolerance",
-  "version": "0.3.2",
+  "version": "0.3.3",
   "minimumDependencyAge": {
     "age": "P1D",
     "exclude": [
@@ -13,7 +13,7 @@
     "check:ui:bundle": "deno run --config deno.json --lock=deno.lock --frozen -A src/ui/viewers/check-bundle.ts",
     "check": "deno check mod.ts server.ts src/api/iso286.ts src/tools/types.ts src/tools/tolerance.ts src/tools/limits.ts src/tools/fit_analyze.ts src/tools/stackup.ts src/tools/mod.ts src/client.ts src/ui/viewers.ts scripts/check_iso286_fixtures.ts scripts/smoke_stdio.ts",
     "check:iso286-fixtures": "deno run --allow-read scripts/check_iso286_fixtures.ts",
-    "smoke:stdio": "deno run --allow-run scripts/smoke_stdio.ts --expect-version 0.3.2 -- deno run --allow-all server.ts --stdio",
+    "smoke:stdio": "deno run --allow-run scripts/smoke_stdio.ts --expect-version 0.3.3 -- deno run --allow-all server.ts --stdio",
     "lint": "deno lint",
     "fmt": "deno fmt --check deno.json mod.ts server.ts src tests scripts",
     "release:check": "deno task fmt && deno task check && deno task lint && deno task check:iso286-fixtures && deno task test && deno task check:ui:bundle && deno task smoke:stdio",
@@ -21,7 +21,8 @@
   },
   "exports": {
     ".": "./mod.ts",
-    "./server": "./server.ts"
+    "./server": "./server.ts",
+    "./view-app-manifest": "./src/ui/view-app-manifest.json"
   },
   "publish": {
     "include": [
@@ -31,6 +32,7 @@
       "src/**/*.tsx",
       "src/**/*.css",
       "src/**/*.html",
+      "src/ui/view-app-manifest.json",
       "src/ui/dist/**/*.html",
       "README.md",
       "CHANGELOG.md",

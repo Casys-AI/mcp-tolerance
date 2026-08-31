@@ -1,0 +1,51 @@
+{
+  "schemaVersion": "io.casys.mcp.view-app-manifest/1.0",
+  "app": {
+    "id": "io.casys.mcp-tolerance",
+    "title": "Tolerance Views",
+    "version": "0.3.3"
+  },
+  "resources": [
+    {
+      "uri": "ui://mcp-tolerance/limits-viewer",
+      "ownership": "whole-view",
+      "resultSchemas": [
+        "io.casys.mcp-tolerance.limits-result/1.0",
+        "io.casys.mcp-tolerance.it-result/1.0"
+      ],
+      "acceptedActions": [
+        "viewer.session.apply"
+      ],
+      "sessionSchemas": [
+        "io.casys.mcp-tolerance.recorded-limits-session/1.0"
+      ]
+    },
+    {
+      "uri": "ui://mcp-tolerance/fit-viewer",
+      "ownership": "whole-view",
+      "resultSchemas": [
+        "io.casys.mcp-tolerance.fit-result/1.0",
+        "io.casys.mcp-tolerance.fit-analysis-result/1.0"
+      ],
+      "acceptedActions": [
+        "viewer.session.apply"
+      ],
+      "sessionSchemas": [
+        "io.casys.mcp-tolerance.recorded-fit-session/1.0"
+      ]
+    },
+    {
+      "uri": "ui://mcp-tolerance/stackup-viewer",
+      "ownership": "whole-view",
+      "resultSchemas": [
+        "io.casys.mcp-tolerance.stackup-result/1.0"
+      ],
+      "acceptedActions": [
+        "viewer.session.apply"
+      ],
+      "sessionSchemas": [
+        "io.casys.mcp-tolerance.recorded-stackup-session/1.0"
+      ]
+    }
+  ]
+}
