@@ -1,10 +1,13 @@
 /** Provider-owned compatibility declaration for direct and recorded tolerance views. */
 
+import {
+  VIEW_APP_MANIFEST_SCHEMA,
+  VIEWER_SESSION_APPLY_ACTION,
+} from "@casys/mcp-view-contracts";
 import { FIT_VIEWER_URI, LIMITS_VIEWER_URI, STACKUP_VIEWER_URI } from "./viewers.ts";
 
-export const TOLERANCE_VIEW_APP_MANIFEST_SCHEMA =
-  "io.casys.mcp.view-app-manifest/1.0" as const;
-export const TOLERANCE_VIEWER_SESSION_ACTION = "viewer.session.apply" as const;
+export const TOLERANCE_VIEW_APP_MANIFEST_SCHEMA = VIEW_APP_MANIFEST_SCHEMA;
+export const TOLERANCE_VIEWER_SESSION_ACTION = VIEWER_SESSION_APPLY_ACTION;
 
 export const TOLERANCE_UI_RESOURCE_URIS = {
   limits: LIMITS_VIEWER_URI,
