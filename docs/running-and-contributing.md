@@ -34,7 +34,8 @@ digest for a reproducible deployment.
 ## Viewer builds
 
 Viewer builds use the split MCP View packages from `Casys-AI/mcp-server` at commit
-`0629f67179868c9f17a3fb6705da32fdfcbcc216`:
+`342c1b7456c011d3f21cad988f9dde23bcbecae0` (View `0.9.3`, components `0.7.1`, contracts
+`0.1.0`):
 
 ```bash
 export MCP_VIEW_LOCAL_ROOT=/absolute/path/to/mcp-server/packages/view
@@ -47,6 +48,11 @@ deno task check:ui:bundle
 
 There is no registry fallback for a viewer build. The committed HTML must be rebuilt
 after changing TSX, CSS, model adapters, or MCP View inputs.
+
+The shared `startPreactSurfaceApp` lifecycle receives recorded data through
+`viewerSession`. Each resource keeps its existing strict envelope and projection
+fingerprint check; rejected sessions display an error state. The limits, fit, and
+stackup components remain the App-owned surfaces.
 
 The README capture uses the exact `H7/g6 @ 25 mm` result emitted by
 `tolerance_fit_analyze` and the committed `fit-viewer` bundle in a minimal MCP Apps host
