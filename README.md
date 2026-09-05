@@ -32,7 +32,7 @@ deno run \
   --allow-env \
   --allow-read=mcp-server.yaml \
   --allow-net=jsr.io \
-  jsr:@casys/mcp-tolerance@0.3.4/server \
+  jsr:@casys/mcp-tolerance@0.3.5/server \
   --stdio
 ```
 
@@ -48,7 +48,7 @@ Minimal MCP client configuration:
         "--allow-env",
         "--allow-read=mcp-server.yaml",
         "--allow-net=jsr.io",
-        "jsr:@casys/mcp-tolerance@0.3.4/server",
+        "jsr:@casys/mcp-tolerance@0.3.5/server",
         "--stdio"
       ]
     }
@@ -63,7 +63,7 @@ deno run \
   --allow-env \
   --allow-read=mcp-server.yaml \
   --allow-net=127.0.0.1:3019,jsr.io \
-  jsr:@casys/mcp-tolerance@0.3.4/server \
+  jsr:@casys/mcp-tolerance@0.3.5/server \
   --port=3019
 ```
 
@@ -74,7 +74,7 @@ contract.
 
 ```bash
 docker run --rm -p 127.0.0.1:3019:3019 \
-  ghcr.io/casys-ai/mcp-tolerance:0.3.4 http
+  ghcr.io/casys-ai/mcp-tolerance:0.3.5 http
 ```
 
 Use `stdio` instead of `http` for an interactive container client. Version tags and
@@ -106,7 +106,7 @@ session, anchor, approval, or manufacturing claim.
 ## Library
 
 ```bash
-deno add jsr:@casys/mcp-tolerance@0.3.4
+deno add jsr:@casys/mcp-tolerance@0.3.5
 ```
 
 ```ts

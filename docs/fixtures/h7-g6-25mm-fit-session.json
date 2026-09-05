@@ -1,0 +1,57 @@
+{
+  "schemaVersion": "io.casys.mcp-tolerance.recorded-fit-session/1.0",
+  "resourceUri": "ui://mcp-tolerance/fit-viewer",
+  "resultSchema": "io.casys.mcp-tolerance.fit-analysis-result/1.0",
+  "readOnly": true,
+  "basis": {
+    "projectId": "tolerance-fit-viewer-fixture",
+    "projectRevision": 0,
+    "subjectId": "H7/g6@25mm-fixture",
+    "thread": {
+      "id": "documentation-fixture-not-evidence",
+      "revision": 0
+    },
+    "artifact": {
+      "id": "iso286-h7-g6-25mm-fixture",
+      "fingerprint": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    }
+  },
+  "structuredContent": {
+    "violations": [],
+    "provenance": "ISO 286-1:2010 formulas/tables",
+    "nominal_diameter_mm": 25,
+    "diameter_range_mm": [
+      18,
+      30
+    ],
+    "hole": {
+      "designation": "H7",
+      "letter": "H",
+      "grade": 7,
+      "EI_um": 0,
+      "ES_um": 21,
+      "IT_um": 21
+    },
+    "shaft": {
+      "designation": "g6",
+      "letter": "g",
+      "grade": 6,
+      "ei_um": -20,
+      "es_um": -7,
+      "IT_um": 13
+    },
+    "clearance_min_um": 7,
+    "clearance_max_um": 41,
+    "fit_type": "clearance",
+    "not_checked": [
+      "Surface roughness and form tolerances are not included — this tool computes size limits only.",
+      "Geometric tolerances (circularity, cylindricity, perpendicularity) are not modelled.",
+      "Thermal expansion effects on the actual assembled fit are not computed.",
+      "Assembly forces, press-fit stresses, and retained stress for interference fits are not computed.",
+      "Nominal diameters above 500 mm or at or below 0 mm are outside ISO 286-1 and will be rejected.",
+      "Supported hole letters: C, D, E, F, G, H, JS, K, M, N, P, R, S.",
+      "Supported shaft letters: c, d, e, f, g, h, js, k, m, n, p, r, s, u."
+    ]
+  },
+  "projectionFingerprint": "sha256:a83f2e9aad433643fc0a27dbcf28be80a6a38d5ce2d43a80977b5b1e3cbd3678"
+}

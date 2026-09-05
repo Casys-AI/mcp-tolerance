@@ -21,11 +21,18 @@ import {
 } from "@casys/mcp-view-components/preact/components";
 import { UNIT_MM, UNIT_MM2 } from "./format.ts";
 import {
+  omittedContributorsLabel,
+  readingLabel,
+  stackupIdentDetail,
+  toleranceMessages,
+} from "./i18n.ts";
+import {
   presentNotChecked,
   presentStackup,
   presentStackupContributors,
   type StackupResult,
 } from "./model.ts";
+import { ScopeNotes } from "./scope-notes.tsx";
 
 export const STACKUP_COMPONENT = "tolerance.stackup-result";
 export const STACKUP_DEFAULT_SURFACE = {
@@ -35,19 +42,27 @@ export const STACKUP_DEFAULT_SURFACE = {
 
 type StackupProps = PreactSurfaceComponentProps<StackupResult>;
 
-const StackupResultView = ({ data }: StackupProps) => {
-  const view = presentStackup(data);
-  const table = presentStackupContributors(data);
+const StackupResultView = ({ data, context }: StackupProps) => {
+  const locale = context.hostContext?.locale;
+  const t = toleranceMessages(locale);
+  const view = presentStackup(data, locale);
+  const table = presentStackupContributors(data, locale);
   const notes = presentNotChecked(data.not_checked);
+  const omitted = omittedContributorsLabel(t, table.omitted, locale);
   return (
     <SemanticElement
       reference={{ domain: "tolerance", kind: "stackup-1d", id: "result" }}
       density="card"
-      ident={<ElementIdent label={view.title} detail={view.eyebrow} />}
+      ident={
+        <ElementIdent
+          label={t("stackupTitle")}
+          detail={stackupIdentDetail(t, data.contributor_count, locale)}
+        />
+      }
       reading={view.metrics.map((reading) => (
         <ElementReading
           key={reading.id}
-          label={reading.label}
+          label={readingLabel(t, reading.id, "stackup")}
           value={reading.value}
           unit={reading.unit}
         />
@@ -56,63 +71,49 @@ const StackupResultView = ({ data }: StackupProps) => {
         <ElementBody>
           <Stack gap="sm">
             <DataTable
-              label="Stack-up contributors"
+              label={t("contributorsTable")}
               rows={table.rows}
               rowKey={(row) => row.id}
               columns={[
-                { id: "name", label: "Name", render: (row) => row.name },
+                { id: "name", label: t("name"), render: (row) => row.name },
                 {
                   id: "signed_nominal_mm",
-                  label: `Signed nominal (${UNIT_MM})`,
+                  label: t("signedNominal", { unit: UNIT_MM }),
                   align: "right",
                   render: (row) => row.signed_nominal_mm,
                 },
                 {
                   id: "worst_case_upper_excursion_mm",
-                  label: `WC upper (${UNIT_MM})`,
+                  label: t("wcUpper", { unit: UNIT_MM }),
                   align: "right",
                   render: (row) => row.worst_case_upper_excursion_mm,
                 },
                 {
                   id: "worst_case_lower_excursion_mm",
-                  label: `WC lower (${UNIT_MM})`,
+                  label: t("wcLower", { unit: UNIT_MM }),
                   align: "right",
                   render: (row) => row.worst_case_lower_excursion_mm,
                 },
                 {
                   id: "rss_upper_sq_mm2",
-                  label: `RSS upper (${UNIT_MM2})`,
+                  label: t("rssUpper", { unit: UNIT_MM2 }),
                   align: "right",
                   render: (row) => row.rss_upper_sq_mm2,
                 },
                 {
                   id: "rss_lower_sq_mm2",
-                  label: `RSS lower (${UNIT_MM2})`,
+                  label: t("rssLower", { unit: UNIT_MM2 }),
                   align: "right",
                   render: (row) => row.rss_lower_sq_mm2,
                 },
               ]}
             />
-            {table.omittedLabel
-              ? <Message tone="neutral">{table.omittedLabel}</Message>
-              : null}
-            {notes.items.length > 0
-              ? (
-                <div aria-label="Not checked" class="tolerance-scope-notes">
-                  <strong>Not checked</strong>
-                  {notes.items.map((note, index) => (
-                    <Message key={`note-${index}`} tone="neutral">{note}</Message>
-                  ))}
-                  {notes.omittedLabel
-                    ? <Message tone="neutral">{notes.omittedLabel}</Message>
-                    : null}
-                </div>
-              )
-              : null}
+            {omitted ? <Message tone="neutral">{omitted}</Message> : null}
+            <ScopeNotes notes={notes} t={t} locale={locale} />
           </Stack>
         </ElementBody>
       }
-      provenance={<ElementProvenance label="Provenance" value={view.provenance} />}
+      provenance={<ElementProvenance label={t("provenance")} value={view.provenance} />}
     />
   );
 };

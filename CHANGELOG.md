@@ -2,6 +2,21 @@
 
 All notable changes to `@casys/mcp-tolerance` are documented here.
 
+## 0.3.5 — 2026-09-05
+
+- Viewer builds pin the split MCP View sources at
+  `b08802df353bb25d25a1c8d64b22ea61b5287ae0` (View 0.9.3, contracts 0.1.0, components
+  0.9.0). Package and App are 0.3.5; tool schemas, units, and ISO calculation logic are
+  unchanged. This is a viewer-kit pin, not a live project adoption of that revision.
+- Limits, fit, and stack-up surfaces translate interface labels through kit
+  `createTranslator` dictionaries (EN/FR) and `hostContext.locale`. Loading, empty, and
+  session-rejected statuses use kit `SurfaceLabel` callbacks on the existing
+  `startPreactSurfaceApp` facade, resolved when the status renders. `documentLanguage`
+  follows `toleranceMessages.locale`. Display numbers follow a valid host locale without
+  changing engineering precision or units. Literal domain states, codes, ids, tool
+  names, diagnostics, and source strings stay as recorded. Boot failure before the host
+  connects stays English.
+
 ## 0.3.4 — 2026-08-31
 
 - MCP Apps for `tolerance_limits`/`tolerance_it`, `tolerance_fit`/

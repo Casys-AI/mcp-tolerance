@@ -8,7 +8,5 @@ bootToleranceViewer((root) =>
     view: "limits",
     registry: LIMITS_COMPONENT_REGISTRY,
     validate: isLimitsViewerData,
-    loadingLabel: "Receiving an ISO 286-1 limits result…",
-    emptyLabel: "No ISO 286-1 limits result was received.",
   })
 );

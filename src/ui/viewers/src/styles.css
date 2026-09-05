@@ -11,14 +11,3 @@ body {
 .tolerance-component-surface .mcp-view-element-provenance {
   margin-top: 0.25rem;
 }
-
-.tolerance-scope-notes {
-  display: grid;
-  gap: 0.35rem;
-}
-
-.tolerance-scope-notes > strong {
-  color: var(--mcp-view-muted, #5c6b76);
-  font-size: 0.72rem;
-  font-weight: 600;
-}

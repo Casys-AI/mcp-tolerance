@@ -441,7 +441,10 @@ export function parseFitViewerData(value: unknown): FitViewerData {
   return parseFitResult(value);
 }
 
-export function presentLimits(data: LimitsResult): ResultCardView {
+export function presentLimits(
+  data: LimitsResult,
+  locale?: string,
+): ResultCardView {
   return {
     title: data.designation,
     eyebrow: data.designation_type === "hole" ? "ISO 286-1 hole" : "ISO 286-1 shaft",
@@ -450,69 +453,78 @@ export function presentLimits(data: LimitsResult): ResultCardView {
       metric(
         "nominal",
         "Nominal",
-        formatNumber(data.nominal_diameter_mm),
+        formatNumber(data.nominal_diameter_mm, locale),
         UNIT_MM,
       ),
       metric(
         "lower",
         "Lower deviation",
-        formatSignedNumber(data.lower_um),
+        formatSignedNumber(data.lower_um, locale),
         UNIT_UM,
       ),
       metric(
         "upper",
         "Upper deviation",
-        formatSignedNumber(data.upper_um),
+        formatSignedNumber(data.upper_um, locale),
         UNIT_UM,
       ),
-      metric("it", "IT", formatNumber(data.IT_um), UNIT_UM),
+      metric("it", "IT", formatNumber(data.IT_um, locale), UNIT_UM),
     ],
     facts: [
       {
         id: "range",
         label: "Diameter range",
-        value: formatRangeMm(data.diameter_range_mm),
+        value: formatRangeMm(data.diameter_range_mm, locale),
       },
-      { id: "grade", label: "IT grade", value: formatNumber(data.it_grade) },
+      {
+        id: "grade",
+        label: "IT grade",
+        value: formatNumber(data.it_grade, locale),
+      },
       {
         id: "fundamental",
         label: "Fundamental deviation",
-        value: `${formatSignedNumber(data.fundamental_deviation_um)} ${UNIT_UM}`,
+        value: `${
+          formatSignedNumber(data.fundamental_deviation_um, locale)
+        } ${UNIT_UM}`,
       },
     ],
     provenance: data.provenance,
   };
 }
 
-export function presentIt(data: ItResult): ResultCardView {
+export function presentIt(data: ItResult, locale?: string): ResultCardView {
   return {
-    title: `IT${formatNumber(data.grade)}`,
+    title: `IT${formatNumber(data.grade, locale)}`,
     eyebrow: "ISO 286-1 fundamental tolerance",
     metrics: [
       metric(
         "nominal",
         "Nominal",
-        formatNumber(data.nominal_diameter_mm),
+        formatNumber(data.nominal_diameter_mm, locale),
         UNIT_MM,
       ),
-      metric("it", "IT", formatNumber(data.IT_um), UNIT_UM),
+      metric("it", "IT", formatNumber(data.IT_um, locale), UNIT_UM),
     ],
     facts: [
       {
         id: "range",
         label: "Diameter range",
-        value: formatRangeMm(data.diameter_range_mm),
+        value: formatRangeMm(data.diameter_range_mm, locale),
       },
     ],
     provenance: data.provenance,
   };
 }
 
-export function presentLimitsViewer(data: LimitsViewerData): ResultCardView {
-  return "designation" in data ? presentLimits(data) : presentIt(data);
+export function presentLimitsViewer(
+  data: LimitsViewerData,
+  locale?: string,
+): ResultCardView {
+  return "designation" in data ? presentLimits(data, locale) : presentIt(data, locale);
 }
 
-export function presentFit(data: FitResult): ResultCardView {
+export function presentFit(data: FitResult, locale?: string): ResultCardView {
   return {
     title: `${data.hole.designation}/${data.shaft.designation}`,
     eyebrow: "ISO 286-1 hole/shaft fit",
@@ -521,31 +533,31 @@ export function presentFit(data: FitResult): ResultCardView {
       metric(
         "nominal",
         "Nominal",
-        formatNumber(data.nominal_diameter_mm),
+        formatNumber(data.nominal_diameter_mm, locale),
         UNIT_MM,
       ),
       metric(
         "min-clearance",
         "Minimum clearance",
-        formatNumber(data.fit.min_clearance_um),
+        formatNumber(data.fit.min_clearance_um, locale),
         UNIT_UM,
       ),
       metric(
         "max-clearance",
         "Maximum clearance",
-        formatNumber(data.fit.max_clearance_um),
+        formatNumber(data.fit.max_clearance_um, locale),
         UNIT_UM,
       ),
       metric(
         "min-interference",
         "Minimum interference",
-        formatNumber(data.fit.min_interference_um),
+        formatNumber(data.fit.min_interference_um, locale),
         UNIT_UM,
       ),
       metric(
         "max-interference",
         "Maximum interference",
-        formatNumber(data.fit.max_interference_um),
+        formatNumber(data.fit.max_interference_um, locale),
         UNIT_UM,
       ),
     ],
@@ -553,14 +565,17 @@ export function presentFit(data: FitResult): ResultCardView {
       {
         id: "range",
         label: "Diameter range",
-        value: formatRangeMm(data.diameter_range_mm),
+        value: formatRangeMm(data.diameter_range_mm, locale),
       },
     ],
     provenance: data.provenance,
   };
 }
 
-export function presentFitAnalyze(data: FitAnalyzeResult): ResultCardView {
+export function presentFitAnalyze(
+  data: FitAnalyzeResult,
+  locale?: string,
+): ResultCardView {
   return {
     title: `${data.hole.designation}/${data.shaft.designation}`,
     eyebrow: "ISO 286-1 hole/shaft fit",
@@ -569,19 +584,19 @@ export function presentFitAnalyze(data: FitAnalyzeResult): ResultCardView {
       metric(
         "nominal",
         "Nominal",
-        formatNumber(data.nominal_diameter_mm),
+        formatNumber(data.nominal_diameter_mm, locale),
         UNIT_MM,
       ),
       metric(
         "min-clearance",
         "Minimum clearance",
-        formatNumber(data.clearance_min_um),
+        formatNumber(data.clearance_min_um, locale),
         UNIT_UM,
       ),
       metric(
         "max-clearance",
         "Maximum clearance",
-        formatNumber(data.clearance_max_um),
+        formatNumber(data.clearance_max_um, locale),
         UNIT_UM,
       ),
     ],
@@ -589,56 +604,72 @@ export function presentFitAnalyze(data: FitAnalyzeResult): ResultCardView {
       {
         id: "range",
         label: "Diameter range",
-        value: formatRangeMm(data.diameter_range_mm),
+        value: formatRangeMm(data.diameter_range_mm, locale),
       },
     ],
     provenance: data.provenance,
   };
 }
 
-export function presentFitViewer(data: FitViewerData): ResultCardView {
-  return "fit_type" in data ? presentFitAnalyze(data) : presentFit(data);
+export function presentFitViewer(
+  data: FitViewerData,
+  locale?: string,
+): ResultCardView {
+  return "fit_type" in data
+    ? presentFitAnalyze(data, locale)
+    : presentFit(data, locale);
 }
 
-export function presentFitMembers(data: FitViewerData): readonly FactView[] {
+export function presentFitMembers(
+  data: FitViewerData,
+  locale?: string,
+): readonly FactView[] {
   return [
     {
       id: "hole",
       label: `Hole ${data.hole.designation}`,
-      value: `${formatSignedNumber(data.hole.EI_um)}/${
-        formatSignedNumber(data.hole.ES_um)
-      } ${UNIT_UM} · IT ${formatNumber(data.hole.IT_um)} ${UNIT_UM}`,
+      value: `${formatSignedNumber(data.hole.EI_um, locale)}/${
+        formatSignedNumber(data.hole.ES_um, locale)
+      } ${UNIT_UM} · IT ${formatNumber(data.hole.IT_um, locale)} ${UNIT_UM}`,
     },
     {
       id: "shaft",
       label: `Shaft ${data.shaft.designation}`,
-      value: `${formatSignedNumber(data.shaft.ei_um)}/${
-        formatSignedNumber(data.shaft.es_um)
-      } ${UNIT_UM} · IT ${formatNumber(data.shaft.IT_um)} ${UNIT_UM}`,
+      value: `${formatSignedNumber(data.shaft.ei_um, locale)}/${
+        formatSignedNumber(data.shaft.es_um, locale)
+      } ${UNIT_UM} · IT ${formatNumber(data.shaft.IT_um, locale)} ${UNIT_UM}`,
     },
   ];
 }
 
-export function presentStackup(data: StackupResult): ResultCardView {
+export function presentStackup(
+  data: StackupResult,
+  locale?: string,
+): ResultCardView {
   return {
     title: "1D stack-up",
-    eyebrow: `${formatNumber(data.contributor_count)} contributors`,
+    eyebrow: `${formatNumber(data.contributor_count, locale)} contributors`,
     metrics: [
-      metric("nominal", "Nominal", formatNumber(data.nominal_mm), UNIT_MM),
+      metric(
+        "nominal",
+        "Nominal",
+        formatNumber(data.nominal_mm, locale),
+        UNIT_MM,
+      ),
       metric(
         "wc-min",
         "Worst-case min",
-        formatNumber(data.worst_case_min_mm),
+        formatNumber(data.worst_case_min_mm, locale),
         UNIT_MM,
       ),
       metric(
         "wc-max",
         "Worst-case max",
-        formatNumber(data.worst_case_max_mm),
+        formatNumber(data.worst_case_max_mm, locale),
         UNIT_MM,
       ),
-      metric("rss-min", "RSS min", formatNumber(data.rss_min_mm), UNIT_MM),
-      metric("rss-max", "RSS max", formatNumber(data.rss_max_mm), UNIT_MM),
+      metric("rss-min", "RSS min", formatNumber(data.rss_min_mm, locale), UNIT_MM),
+      metric("rss-max", "RSS max", formatNumber(data.rss_max_mm, locale), UNIT_MM),
     ],
     facts: [],
     provenance: data.provenance,
@@ -647,6 +678,7 @@ export function presentStackup(data: StackupResult): ResultCardView {
 
 export function presentStackupContributors(
   data: StackupResult,
+  locale?: string,
 ): ContributorTableView {
   const capped = capList(data.contributor_breakdown, CONTRIBUTOR_CAP);
   return {
@@ -661,15 +693,17 @@ export function presentStackupContributors(
     rows: capped.items.map((item, index) => ({
       id: `${index}:${item.name}`,
       name: item.name,
-      signed_nominal_mm: formatNumber(item.signed_nominal_mm),
+      signed_nominal_mm: formatNumber(item.signed_nominal_mm, locale),
       worst_case_upper_excursion_mm: formatNumber(
         item.worst_case_upper_excursion_mm,
+        locale,
       ),
       worst_case_lower_excursion_mm: formatNumber(
         item.worst_case_lower_excursion_mm,
+        locale,
       ),
-      rss_upper_sq_mm2: formatNumber(item.rss_upper_sq_mm2),
-      rss_lower_sq_mm2: formatNumber(item.rss_lower_sq_mm2),
+      rss_upper_sq_mm2: formatNumber(item.rss_upper_sq_mm2, locale),
+      rss_lower_sq_mm2: formatNumber(item.rss_lower_sq_mm2, locale),
     })),
     omitted: capped.omitted,
     omittedLabel: omittedLabel(capped.omitted, "contributors"),

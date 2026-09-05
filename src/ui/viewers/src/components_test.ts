@@ -3,7 +3,6 @@ import {
   advertisedComponentCatalog,
   mountComponentSurface,
 } from "@casys/mcp-view-components";
-import type { PreactSurfaceContext } from "@casys/mcp-view-components/preact";
 import {
   FIT_COMPONENT,
   FIT_COMPONENT_REGISTRY,
@@ -27,19 +26,12 @@ import {
   STACKUP_TWO,
 } from "./fixtures_test.ts";
 import {
-  type FitViewerData,
-  type LimitsViewerData,
   parseFitAnalyzeResult,
   parseFitResult,
   parseItResult,
   parseLimitsResult,
   parseStackupResult,
-  type StackupResult,
 } from "./model.ts";
-
-const limitsContext = {} as unknown as PreactSurfaceContext<LimitsViewerData>;
-const fitContext = {} as unknown as PreactSurfaceContext<FitViewerData>;
-const stackupContext = {} as unknown as PreactSurfaceContext<StackupResult>;
 
 Deno.test("each viewer advertises exactly one business-object component", () => {
   const cases = [
@@ -83,7 +75,14 @@ Deno.test("provider components use semantic slots without path or verdict UI", a
     assertEquals(source.includes("ElementVerdict"), false, relative);
     assertEquals(source.includes("PathBar"), false, relative);
     assertEquals(source.includes("<Card"), false, relative);
+    assertEquals(source.includes("FocusedView"), false, relative);
+    assertEquals(source.includes("Disclosure"), false, relative);
   }
+  const notes = await Deno.readTextFile(
+    new URL("./scope-notes.tsx", import.meta.url),
+  );
+  assertEquals(notes.includes("ElementSection"), true);
+  assertEquals(notes.includes("Message"), true);
 });
 
 Deno.test({
@@ -94,7 +93,6 @@ Deno.test({
       await withMountedSurface(
         LIMITS_COMPONENT_REGISTRY,
         data,
-        limitsContext,
         (root) => {
           assertEquals(root.querySelectorAll("[data-component]").length, 1);
           assertEquals(
@@ -133,7 +131,6 @@ Deno.test({
       await withMountedSurface(
         FIT_COMPONENT_REGISTRY,
         data,
-        fitContext,
         (root) => {
           assertEquals(root.querySelectorAll("[data-component]").length, 1);
           assertEquals(
@@ -168,7 +165,6 @@ Deno.test({
     await withMountedSurface(
       STACKUP_COMPONENT_REGISTRY,
       parseStackupResult(STACKUP_TWO),
-      stackupContext,
       (root) => {
         assertEquals(root.querySelectorAll("[data-component]").length, 1);
         assertEquals(
@@ -176,6 +172,7 @@ Deno.test({
           1,
         );
         assertEquals(root.querySelectorAll(".mcp-view-table").length, 1);
+        assertEquals(root.querySelector("details"), null);
         assertStringIncludes(root.textContent ?? "", "housing depth");
         assertStringIncludes(root.textContent ?? "", "shaft length");
         assertStringIncludes(root.textContent ?? "", "Worst-case min");
@@ -187,13 +184,76 @@ Deno.test({
   },
 });
 
+Deno.test({
+  name: "host locale translates labels and leaves recorded domain strings intact",
+  permissions: { read: true, env: true },
+  async fn() {
+    await withMountedSurface(
+      FIT_COMPONENT_REGISTRY,
+      parseFitAnalyzeResult(FIT_ANALYZE_H7_G6),
+      (root) => {
+        assertStringIncludes(root.textContent ?? "", "Type d’ajustement");
+        assertStringIncludes(root.textContent ?? "", "Jeu minimum");
+        assertStringIncludes(root.textContent ?? "", "Alésage H7");
+        assertStringIncludes(root.textContent ?? "", "Arbre g6");
+        assertStringIncludes(root.textContent ?? "", "clearance");
+        assertStringIncludes(
+          root.textContent ?? "",
+          "ISO 286-1:2010 formulas/tables",
+        );
+        assertEquals((root.textContent ?? "").includes("Fit type"), false);
+        assertEquals((root.textContent ?? "").includes("Hole H7"), false);
+      },
+      "fr",
+    );
+    await withMountedSurface(
+      LIMITS_COMPONENT_REGISTRY,
+      parseLimitsResult(LIMITS_H7),
+      (root) => {
+        assertStringIncludes(root.textContent ?? "", "Alésage ISO 286-1");
+        assertStringIncludes(root.textContent ?? "", "Écart inférieur");
+        assertStringIncludes(root.textContent ?? "", "hole");
+        assertStringIncludes(root.textContent ?? "", "H7");
+        assertEquals((root.textContent ?? "").includes("Not checked"), false);
+        assertStringIncludes(root.textContent ?? "", "Non vérifié");
+        assertStringIncludes(
+          root.textContent ?? "",
+          "Surface roughness and form tolerances are not included",
+        );
+      },
+      "fr",
+    );
+    await withMountedSurface(
+      STACKUP_COMPONENT_REGISTRY,
+      parseStackupResult(STACKUP_TWO),
+      (root) => {
+        assertStringIncludes(root.textContent ?? "", "Empilage 1D");
+        assertStringIncludes(root.textContent ?? "", "Min. au pire cas");
+        assertStringIncludes(root.textContent ?? "", "housing depth");
+        assertEquals(root.querySelector("details"), null);
+        assertEquals(root.querySelectorAll(".mcp-view-table").length, 1);
+      },
+      "fr",
+    );
+    await withMountedSurface(
+      FIT_COMPONENT_REGISTRY,
+      parseFitResult(FIT_H7_P6),
+      (root) => {
+        assertStringIncludes(root.textContent ?? "", "Fit type");
+        assertStringIncludes(root.textContent ?? "", "interference");
+      },
+      "not a locale",
+    );
+  },
+});
+
 async function withMountedSurface<TData>(
   registry: Parameters<
     typeof mountComponentSurface<TData, unknown>
   >[0]["registry"],
   data: TData,
-  appContext: unknown,
   run: (root: HTMLElement) => void | Promise<void>,
+  locale?: string,
 ): Promise<void> {
   const documentModule = await import("linkedom");
   const dom = documentModule.parseHTML(
@@ -206,12 +266,13 @@ async function withMountedSurface<TData>(
   });
   try {
     const root = dom.document.getElementById("root") as unknown as HTMLElement;
+    const hostContext = locale === undefined ? {} : { locale };
     const mounted = await mountComponentSurface({
       root,
       registry,
       data,
-      appContext,
-      hostContext: {},
+      appContext: { hostContext },
+      hostContext,
     });
     try {
       await run(root);

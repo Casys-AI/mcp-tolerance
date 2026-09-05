@@ -2,7 +2,7 @@
  * Smoke an MCP server launched as a native stdio process.
  *
  * Usage:
- *   deno run --allow-run scripts/smoke_stdio.ts --expect-version 0.3.4 -- <command> [args...]
+ *   deno run --allow-run scripts/smoke_stdio.ts --expect-version 0.3.5 -- <command> [args...]
  *
  * The target is launched twice so each supported first-request path is proved
  * independently. Every stdout line must be a JSON-RPC object, and closing the

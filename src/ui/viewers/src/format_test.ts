@@ -3,6 +3,7 @@ import {
   capList,
   CONTRIBUTOR_CAP,
   formatNumber,
+  formatRangeMm,
   formatSignedNumber,
   NOT_CHECKED_CAP,
   omittedLabel,
@@ -11,7 +12,7 @@ import {
   UNIT_UM,
 } from "./format.ts";
 
-Deno.test("formatNumber is locale-independent and trims trailing zeros", () => {
+Deno.test("formatNumber keeps engineering digits and trims trailing zeros", () => {
   assertEquals(formatNumber(0), "0");
   assertEquals(formatNumber(-0), "0");
   assertEquals(formatNumber(21), "21");
@@ -20,6 +21,19 @@ Deno.test("formatNumber is locale-independent and trims trailing zeros", () => {
   assertEquals(formatNumber(15.1), "15.1");
   assertEquals(formatNumber(0.000001), "0.000001");
   assertEquals(formatNumber(1.230000), "1.23");
+});
+
+Deno.test("formatNumber uses the host decimal mark without changing digits or units", () => {
+  assertEquals(formatNumber(1.05, "en"), "1.05");
+  assertEquals(formatNumber(1.05, "fr"), "1,05");
+  assertEquals(formatNumber(1.05, "fr-FR"), "1,05");
+  assertEquals(formatNumber(0.000001, "fr"), "0,000001");
+  assertEquals(formatNumber(21, "fr"), "21");
+  assertEquals(formatNumber(1.05, "not a locale"), "1.05");
+  assertEquals(formatNumber(1.05, ""), "1.05");
+  assertEquals(formatSignedNumber(1.05, "fr"), "+1,05");
+  assertEquals(formatRangeMm([18, 30], "fr"), `18–30 ${UNIT_MM}`);
+  assertEquals(formatRangeMm([1.05, 2.1], "fr"), `1,05–2,1 ${UNIT_MM}`);
 });
 
 Deno.test("formatNumber rejects non-finite values instead of inventing text", () => {

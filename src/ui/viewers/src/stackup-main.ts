@@ -8,7 +8,5 @@ bootToleranceViewer((root) =>
     view: "stackup",
     registry: STACKUP_COMPONENT_REGISTRY,
     validate: isStackupViewerData,
-    loadingLabel: "Receiving a 1D stack-up result…",
-    emptyLabel: "No 1D stack-up result was received.",
   })
 );

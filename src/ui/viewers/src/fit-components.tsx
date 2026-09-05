@@ -15,16 +15,17 @@ import {
   ElementProvenance,
   ElementReading,
   KeyValueList,
-  Message,
   SemanticElement,
   Stack,
 } from "@casys/mcp-view-components/preact/components";
+import { factLabel, readingLabel, toleranceMessages } from "./i18n.ts";
 import {
   type FitViewerData,
   presentFitMembers,
   presentFitViewer,
   presentNotChecked,
 } from "./model.ts";
+import { ScopeNotes } from "./scope-notes.tsx";
 
 export const FIT_COMPONENT = "tolerance.fit-result";
 export const FIT_DEFAULT_SURFACE = {
@@ -34,15 +35,27 @@ export const FIT_DEFAULT_SURFACE = {
 
 type FitProps = PreactSurfaceComponentProps<FitViewerData>;
 
-const FitResult = ({ data }: FitProps) => {
-  const view = presentFitViewer(data);
+const FitResult = ({ data, context }: FitProps) => {
+  const locale = context.hostContext?.locale;
+  const t = toleranceMessages(locale);
+  const view = presentFitViewer(data, locale);
   const notes = presentNotChecked(data.not_checked);
-  const facts = [...view.facts, ...presentFitMembers(data)];
+  const facts = [...view.facts, ...presentFitMembers(data, locale)].map(
+    (fact) => ({ ...fact, label: factLabel(t, fact, data) }),
+  );
   const readings = [
     ...(view.badge
-      ? [{ id: "classification", label: "Fit type", value: view.badge.label, unit: "" }]
+      ? [{
+        id: "classification",
+        label: readingLabel(t, "classification", "fit"),
+        value: view.badge.label,
+        unit: "",
+      }]
       : []),
-    ...view.metrics,
+    ...view.metrics.map((reading) => ({
+      ...reading,
+      label: readingLabel(t, reading.id, "fit"),
+    })),
   ];
   return (
     <SemanticElement
@@ -52,7 +65,7 @@ const FitResult = ({ data }: FitProps) => {
         id: `${view.title}@${data.nominal_diameter_mm}mm`,
       }}
       density="card"
-      ident={<ElementIdent label={view.title} detail={view.eyebrow} />}
+      ident={<ElementIdent label={view.title} detail={t("iso286Fit")} />}
       reading={readings.map((reading) => (
         <ElementReading
           key={reading.id}
@@ -65,23 +78,11 @@ const FitResult = ({ data }: FitProps) => {
         <ElementBody>
           <Stack gap="sm">
             <KeyValueList items={facts} />
-            {notes.items.length > 0
-              ? (
-                <div aria-label="Not checked" class="tolerance-scope-notes">
-                  <strong>Not checked</strong>
-                  {notes.items.map((note, index) => (
-                    <Message key={`note-${index}`} tone="neutral">{note}</Message>
-                  ))}
-                  {notes.omittedLabel
-                    ? <Message tone="neutral">{notes.omittedLabel}</Message>
-                    : null}
-                </div>
-              )
-              : null}
+            <ScopeNotes notes={notes} t={t} locale={locale} />
           </Stack>
         </ElementBody>
       }
-      provenance={<ElementProvenance label="Provenance" value={view.provenance} />}
+      provenance={<ElementProvenance label={t("provenance")} value={view.provenance} />}
     />
   );
 };

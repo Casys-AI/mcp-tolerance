@@ -1,6 +1,7 @@
 import {
   type PreactSurfaceAppOptions,
   startPreactSurfaceApp,
+  type SurfaceLabel,
 } from "@casys/mcp-view-components/preact";
 import type { ViewComponentRegistry } from "@casys/mcp-view-components";
 import type { PreactSurfaceContext } from "@casys/mcp-view-components/preact";
@@ -10,15 +11,20 @@ import {
   TOLERANCE_VIEW_APP_MANIFEST,
   type ToleranceViewKey,
 } from "../../app-manifest.ts";
+import {
+  toleranceEmptyLabel,
+  toleranceLoadingLabel,
+  toleranceMessages,
+} from "./i18n.ts";
 import { parseToleranceRecordedViewSession } from "./recorded-session.ts";
+
+export const SESSION_REJECTED_CODE = "session-rejected";
 
 export interface StartToleranceViewerOptions<TData> {
   readonly root: HTMLElement;
   readonly view: ToleranceViewKey;
   readonly registry: ViewComponentRegistry<TData, PreactSurfaceContext<TData>>;
   readonly validate: (value: unknown) => value is TData;
-  readonly loadingLabel: string;
-  readonly emptyLabel: string;
 }
 
 export async function startToleranceViewer<TData>(
@@ -51,18 +57,27 @@ export function toleranceSurfaceAppOptions<TData>(
         if (!parsed) {
           return {
             kind: "error",
-            title: "Session rejected",
-            code: "session-rejected",
-            message: `Recorded ${options.view} projection rejected.`,
+            title: sessionRejectedTitle,
+            code: SESSION_REJECTED_CODE,
+            message: sessionRejectedMessage(options.view),
           };
         }
         return { kind: "result", result: parsed.structuredContent };
       },
     },
-    loadingLabel: options.loadingLabel,
-    emptyLabel: options.emptyLabel,
+    loadingLabel: toleranceLoadingLabel(options.view),
+    emptyLabel: toleranceEmptyLabel(options.view),
+    documentLanguage: toleranceMessages.locale,
+    themeUpdates: "in-place",
     surfaceClassName: "tolerance-component-surface",
   };
+}
+
+const sessionRejectedTitle: SurfaceLabel = (locale) =>
+  toleranceMessages(locale)("sessionRejected");
+
+function sessionRejectedMessage(view: ToleranceViewKey): SurfaceLabel {
+  return (locale) => toleranceMessages(locale)("sessionRejectedMessage", { view });
 }
 
 export function bootToleranceViewer(
@@ -71,13 +86,12 @@ export function bootToleranceViewer(
   const root = document.getElementById("root");
   if (!root) throw new Error("The tolerance viewer root is missing.");
   void start(root).catch((error) => {
-    const detail = error instanceof Error
-      ? error.message
-      : "The viewer could not start.";
+    const t = toleranceMessages();
+    const detail = error instanceof Error ? error.message : t("viewerStartFailed");
     render(
       createElement(
         StateMessage,
-        { title: "Tolerance viewer unavailable", tone: "danger" },
+        { title: t("viewerUnavailable"), tone: "danger" },
         detail,
       ),
       root,

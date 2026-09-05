@@ -1013,7 +1013,7 @@ Deno.test(
       const discoverResult = discovered.body.result as Record<string, unknown>;
       assertEquals(discoverResult.serverInfo, {
         name: "mcp-tolerance",
-        version: "0.3.4",
+        version: "0.3.5",
       });
 
       const listed = await rpc(url, "tools/list");

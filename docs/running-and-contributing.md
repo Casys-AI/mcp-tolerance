@@ -34,7 +34,7 @@ digest for a reproducible deployment.
 ## Viewer builds
 
 Viewer builds use the split MCP View packages from `Casys-AI/mcp-server` at commit
-`342c1b7456c011d3f21cad988f9dde23bcbecae0` (View `0.9.3`, components `0.7.1`, contracts
+`b08802df353bb25d25a1c8d64b22ea61b5287ae0` (View `0.9.3`, components `0.9.0`, contracts
 `0.1.0`):
 
 ```bash
@@ -54,10 +54,29 @@ The shared `startPreactSurfaceApp` lifecycle receives recorded data through
 fingerprint check; rejected sessions display an error state. The limits, fit, and
 stackup components remain the App-owned surfaces.
 
+Interface labels use `createTranslator` with provider-owned English and French
+dictionaries. Loading, empty, and session-rejected statuses are kit `SurfaceLabel`
+callbacks on the thin App facade; `documentLanguage` follows `toleranceMessages.locale`.
+Visible numbers follow a valid host locale without changing recorded precision, units,
+or domain states. Invalid locales fall back to English. Boot failure before the host
+connects stays English.
+
 The README capture uses the exact `H7/g6 @ 25 mm` result emitted by
 `tolerance_fit_analyze` and the committed `fit-viewer` bundle in a minimal MCP Apps host
-harness. Its visible caption deliberately identifies it as fixture data rather than a
-Digital Thread record.
+harness. Its visible caption deliberately identifies it as fixture data rather than
+engineering execution evidence or a Digital Thread record.
+
+```bash
+deno task docs:viewer-fixture
+deno task docs:viewer-screenshot
+```
+
+The fixture task writes `docs/fixtures/h7-g6-25mm-fit-session.json` from the live tool
+handler. The screenshot task serves the repository on loopback, renders
+`docs/fixtures/viewer-preview.html` in headless Chrome at a fixed window, 2× scale, and
+`en-US` locale, and writes `docs/assets/tolerance-fit-viewer-fixture.png`. Point
+`CHROME_BIN` at a Chrome or `chrome-headless-shell` binary when none of the usual
+locations has one; `ffmpeg` (or `FFMPEG_BIN`) only shrinks the PNG when present.
 
 ## Validation
 

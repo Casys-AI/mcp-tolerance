@@ -15,6 +15,7 @@ await withAuditedViewerDenoConfig(async (configPath) => {
       join(here, "src", "fit-main.ts"),
       join(here, "src", "stackup-main.ts"),
       join(here, "src", "format_test.ts"),
+      join(here, "src", "i18n_test.ts"),
       join(here, "src", "view-contract_test.ts"),
       join(here, "src", "components_test.ts"),
     ],

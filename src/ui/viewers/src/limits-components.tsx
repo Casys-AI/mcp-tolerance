@@ -15,15 +15,21 @@ import {
   ElementProvenance,
   ElementReading,
   KeyValueList,
-  Message,
   SemanticElement,
   Stack,
 } from "@casys/mcp-view-components/preact/components";
+import {
+  factLabel,
+  limitsIdentDetail,
+  readingLabel,
+  toleranceMessages,
+} from "./i18n.ts";
 import {
   type LimitsViewerData,
   presentLimitsViewer,
   presentNotChecked,
 } from "./model.ts";
+import { ScopeNotes } from "./scope-notes.tsx";
 
 export const LIMITS_COMPONENT = "tolerance.limits-result";
 export const LIMITS_DEFAULT_SURFACE = {
@@ -33,16 +39,30 @@ export const LIMITS_DEFAULT_SURFACE = {
 
 type LimitsProps = PreactSurfaceComponentProps<LimitsViewerData>;
 
-const LimitsResult = ({ data }: LimitsProps) => {
-  const view = presentLimitsViewer(data);
+const LimitsResult = ({ data, context }: LimitsProps) => {
+  const locale = context.hostContext?.locale;
+  const t = toleranceMessages(locale);
+  const view = presentLimitsViewer(data, locale);
   const notes = presentNotChecked(data.not_checked);
   const kind = "designation" in data ? "iso286-limits" : "iso286-it";
   const readings = [
     ...(view.badge
-      ? [{ id: "classification", label: "Type", value: view.badge.label, unit: "" }]
+      ? [{
+        id: "classification",
+        label: readingLabel(t, "classification", "limits"),
+        value: view.badge.label,
+        unit: "",
+      }]
       : []),
-    ...view.metrics,
+    ...view.metrics.map((reading) => ({
+      ...reading,
+      label: readingLabel(t, reading.id, "limits"),
+    })),
   ];
+  const facts = view.facts.map((fact) => ({
+    ...fact,
+    label: factLabel(t, fact, data),
+  }));
   return (
     <SemanticElement
       reference={{
@@ -51,7 +71,7 @@ const LimitsResult = ({ data }: LimitsProps) => {
         id: `${view.title}@${data.nominal_diameter_mm}mm`,
       }}
       density="card"
-      ident={<ElementIdent label={view.title} detail={view.eyebrow} />}
+      ident={<ElementIdent label={view.title} detail={limitsIdentDetail(t, data)} />}
       reading={readings.map((reading) => (
         <ElementReading
           key={reading.id}
@@ -60,29 +80,17 @@ const LimitsResult = ({ data }: LimitsProps) => {
           unit={reading.unit || undefined}
         />
       ))}
-      body={view.facts.length > 0 || notes.items.length > 0
+      body={facts.length > 0 || notes.items.length > 0
         ? (
           <ElementBody>
             <Stack gap="sm">
-              {view.facts.length > 0 ? <KeyValueList items={view.facts} /> : null}
-              {notes.items.length > 0
-                ? (
-                  <div aria-label="Not checked" class="tolerance-scope-notes">
-                    <strong>Not checked</strong>
-                    {notes.items.map((note, index) => (
-                      <Message key={`note-${index}`} tone="neutral">{note}</Message>
-                    ))}
-                    {notes.omittedLabel
-                      ? <Message tone="neutral">{notes.omittedLabel}</Message>
-                      : null}
-                  </div>
-                )
-                : null}
+              {facts.length > 0 ? <KeyValueList items={facts} /> : null}
+              <ScopeNotes notes={notes} t={t} locale={locale} />
             </Stack>
           </ElementBody>
         )
         : undefined}
-      provenance={<ElementProvenance label="Provenance" value={view.provenance} />}
+      provenance={<ElementProvenance label={t("provenance")} value={view.provenance} />}
     />
   );
 };

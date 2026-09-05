@@ -8,7 +8,5 @@ bootToleranceViewer((root) =>
     view: "fit",
     registry: FIT_COMPONENT_REGISTRY,
     validate: isFitViewerData,
-    loadingLabel: "Receiving an ISO 286-1 fit result…",
-    emptyLabel: "No ISO 286-1 fit result was received.",
   })
 );

@@ -3,7 +3,7 @@
   "app": {
     "id": "io.casys.mcp-tolerance",
     "title": "Tolerance Views",
-    "version": "0.3.4"
+    "version": "0.3.5"
   },
   "resources": [
     {
