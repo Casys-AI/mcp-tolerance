@@ -7,11 +7,7 @@ import {
   TOLERANCE_VIEW_APP_MANIFEST,
   TOLERANCE_VIEWER_SESSION_ACTION,
 } from "../../app-manifest.ts";
-import {
-  isFitViewerData,
-  isLimitsViewerData,
-  isStackupViewerData,
-} from "./model.ts";
+import { isFitViewerData, isLimitsViewerData, isStackupViewerData } from "./model.ts";
 import {
   fingerprintToleranceRecordedProjection,
   isToleranceRecordedViewSession,
